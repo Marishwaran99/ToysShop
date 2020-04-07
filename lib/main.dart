@@ -188,58 +188,65 @@ class _MyHomePageState extends State<MyHomePage> {
         bottomNavigationBar: BottomNavigationBar(
           onTap: handleTap,
           items: [
-            BottomNavigationBarItem(
-              icon: new Icon(
-                Icons.home,
-                color: _currentIndex == 0
-                    ? Theme.of(context).primaryColor
-                    : Colors.black54,
-              ),
-              title: new Text('Home',
-                  style: TextStyle(
-                    color: _currentIndex == 0
-                        ? Theme.of(context).primaryColor
-                        : Colors.black54,
-                  )),
-            ),
-            BottomNavigationBarItem(
-              icon: new Icon(FontAwesome.list,
-                  color: _currentIndex == 1
-                      ? Theme.of(context).primaryColor
-                      : Colors.black54),
-              title: new Text(
-                'Product',
-                style: TextStyle(
-                    color: _currentIndex == 1
-                        ? Theme.of(context).primaryColor
-                        : Colors.black54),
-              ),
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(FontAwesome.cart_arrow_down,
-                    color: _currentIndex == 2
-                        ? Theme.of(context).primaryColor
-                        : Colors.black54),
-                title: Text(
-                  'Cart',
-                  style: TextStyle(
-                      color: _currentIndex == 2
-                          ? Theme.of(context).primaryColor
-                          : Colors.black54),
-                )),
-            BottomNavigationBarItem(
-                icon: Icon(Ionicons.ios_person,
-                    color: _currentIndex == 3
-                        ? Theme.of(context).primaryColor
-                        : Colors.black54),
-                title: Text(
-                  'Profile',
-                  style: TextStyle(
-                      color: _currentIndex == 3
-                          ? Theme.of(context).primaryColor
-                          : Colors.black54),
-                )),
+            buildBottomNavigationBarItem(context, _currentIndex, 0, Icons.home, "Home"),
+            buildBottomNavigationBarItem(context, _currentIndex, 1, FontAwesome.list, "Products"),
+            buildBottomNavigationBarItem(context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
+            buildBottomNavigationBarItem(context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
+            // BottomNavigationBarItem(
+            //   icon: new Icon(FontAwesome.list,
+            //       color: _currentIndex == 1
+            //           ? Theme.of(context).primaryColor
+            //           : Colors.black54),
+            //   title: new Text(
+            //     'Product',
+            //     style: TextStyle(
+            //         color: _currentIndex == 1
+            //             ? Theme.of(context).primaryColor
+            //             : Colors.black54),
+            //   ),
+            // ),
+            // BottomNavigationBarItem(
+            //     icon: Icon(FontAwesome.cart_arrow_down,
+            //         color: _currentIndex == 2
+            //             ? Theme.of(context).primaryColor
+            //             : Colors.black54),
+            //     title: Text(
+            //       'Cart',
+            //       style: TextStyle(
+            //           color: _currentIndex == 2
+            //               ? Theme.of(context).primaryColor
+            //               : Colors.black54),
+            //     )),
+            // BottomNavigationBarItem(
+            //     icon: Icon(Ionicons.ios_person,
+            //         color: _currentIndex == 3
+            //             ? Theme.of(context).primaryColor
+            //             : Colors.black54),
+            //     title: Text(
+            //       'Profile',
+            //       style: TextStyle(
+            //           color: _currentIndex == 3
+            //               ? Theme.of(context).primaryColor
+            //               : Colors.black54),
+            //     )),
           ],
         ));
+  }
+
+  BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context, int _currentIndex,int number,IconData icon, String text) {
+    return BottomNavigationBarItem(
+            icon: new Icon(
+              icon,
+              color: _currentIndex == number
+                  ? Theme.of(context).primaryColor
+                  : Colors.black54,
+            ),
+            title: new Text(text,
+                style: TextStyle(
+                  color: _currentIndex == number
+                      ? Theme.of(context).primaryColor
+                      : Colors.black54,
+                )),
+          );
   }
 }
