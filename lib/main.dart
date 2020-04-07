@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:toys/cart.dart';
 import 'package:toys/home.dart';
+import 'package:toys/login.dart';
+import 'package:toys/product.dart';
 
 void main() => runApp(MyApp());
 
@@ -53,10 +56,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _currentIndex = 0;
+
+  final List<Widget> _children = [
+    Home(),
+    ProductPage(),
+    CartPage(),
+    LoginPage()
+  ];
 
   static final List<String> _listViewData = [
     "Login",
   ];
+
+  void handleTap(int index){
+    setState(() {
+        _currentIndex = index;
+      });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +184,62 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ),
-        body: Home());
+        body: _children[_currentIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          onTap: handleTap,
+          items: [
+            BottomNavigationBarItem(
+              icon: new Icon(
+                Icons.home,
+                color: _currentIndex == 0
+                    ? Theme.of(context).primaryColor
+                    : Colors.black54,
+              ),
+              title: new Text('Home',
+                  style: TextStyle(
+                    color: _currentIndex == 0
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54,
+                  )),
+            ),
+            BottomNavigationBarItem(
+              icon: new Icon(FontAwesome.list,
+                  color: _currentIndex == 1
+                      ? Theme.of(context).primaryColor
+                      : Colors.black54),
+              title: new Text(
+                'Product',
+                style: TextStyle(
+                    color: _currentIndex == 1
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54),
+              ),
+            ),
+            BottomNavigationBarItem(
+                icon: Icon(FontAwesome.cart_arrow_down,
+                    color: _currentIndex == 2
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54),
+                title: Text(
+                  'Cart',
+                  style: TextStyle(
+                      color: _currentIndex == 2
+                          ? Theme.of(context).primaryColor
+                          : Colors.black54),
+                )),
+            BottomNavigationBarItem(
+                icon: Icon(Ionicons.ios_person,
+                    color: _currentIndex == 3
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54),
+                title: Text(
+                  'Profile',
+                  style: TextStyle(
+                      color: _currentIndex == 3
+                          ? Theme.of(context).primaryColor
+                          : Colors.black54),
+                )),
+          ],
+        ));
   }
 }
