@@ -124,6 +124,9 @@ class _LoginPageState extends State<LoginPage> {
                             _formKey.currentState.save();
                             print(_email);
                             print(_password);
+                            setState(() {
+                              isAuth = true;
+                            });
                           },
                           child: Text(
                             "LOGIN",
@@ -184,7 +187,7 @@ class _LoginPageState extends State<LoginPage> {
                   GestureDetector(
                     onTap:(){
                       setState(() {
-                        isNew = false;
+                        isNew = true;
                       });
                     },
                     child: Text("Sign Up", style: TextStyle(color: Theme.of(context).primaryColor,fontWeight: FontWeight.bold, fontSize: 16)))
@@ -226,6 +229,9 @@ class _LoginPageState extends State<LoginPage> {
                         print(_email);
                         print(_password);
                         print(_username);
+                        setState(() {
+                          isNew = false;
+                        });
                       },
                       child: Text(
                         "SIGN UP",
@@ -272,7 +278,7 @@ class _LoginPageState extends State<LoginPage> {
                   GestureDetector(
                     onTap:(){
                       setState(() {
-                        isNew = true;
+                        isNew = false;
                       });
                     },
                     child: Text("LOGIN", style: TextStyle(color: Theme.of(context).primaryColor,fontWeight: FontWeight.bold, fontSize: 16)))

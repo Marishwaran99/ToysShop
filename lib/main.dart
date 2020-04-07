@@ -16,12 +16,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'Josefin',
           primarySwatch: Colors.blue,
-          primaryColor: Colors.purple[500],
+          primaryColor: Colors.black,
           textTheme: TextTheme(
             headline: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.purple[500]),
+                color: Colors.black),
             title: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             subtitle: TextStyle(
                 fontSize: 16,
