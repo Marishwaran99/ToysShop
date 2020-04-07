@@ -3,6 +3,10 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/cart.dart';
 import 'package:toys/home.dart';
 import 'package:toys/login.dart';
+import 'package:toys/pages/cart.dart';
+import 'package:toys/pages/home.dart';
+import 'package:toys/pages/login.dart';
+import 'package:toys/pages/product.dart';
 import 'package:toys/product.dart';
 
 void main() => runApp(MyApp());
@@ -192,43 +196,6 @@ class _MyHomePageState extends State<MyHomePage> {
             buildBottomNavigationBarItem(context, _currentIndex, 1, FontAwesome.list, "Products"),
             buildBottomNavigationBarItem(context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
             buildBottomNavigationBarItem(context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
-            // BottomNavigationBarItem(
-            //   icon: new Icon(FontAwesome.list,
-            //       color: _currentIndex == 1
-            //           ? Theme.of(context).primaryColor
-            //           : Colors.black54),
-            //   title: new Text(
-            //     'Product',
-            //     style: TextStyle(
-            //         color: _currentIndex == 1
-            //             ? Theme.of(context).primaryColor
-            //             : Colors.black54),
-            //   ),
-            // ),
-            // BottomNavigationBarItem(
-            //     icon: Icon(FontAwesome.cart_arrow_down,
-            //         color: _currentIndex == 2
-            //             ? Theme.of(context).primaryColor
-            //             : Colors.black54),
-            //     title: Text(
-            //       'Cart',
-            //       style: TextStyle(
-            //           color: _currentIndex == 2
-            //               ? Theme.of(context).primaryColor
-            //               : Colors.black54),
-            //     )),
-            // BottomNavigationBarItem(
-            //     icon: Icon(Ionicons.ios_person,
-            //         color: _currentIndex == 3
-            //             ? Theme.of(context).primaryColor
-            //             : Colors.black54),
-            //     title: Text(
-            //       'Profile',
-            //       style: TextStyle(
-            //           color: _currentIndex == 3
-            //               ? Theme.of(context).primaryColor
-            //               : Colors.black54),
-            //     )),
           ],
         ));
   }
