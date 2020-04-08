@@ -33,7 +33,7 @@ class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar:MyAppBar(back:false),
       body: SingleChildScrollView(
         child:Container(
           child: Column(

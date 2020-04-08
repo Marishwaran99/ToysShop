@@ -6,7 +6,7 @@ class Custom{
   Color titleTextColor = Color(0xff222222);
 
   TextStyle appbarTitleTextStyle = TextStyle(fontSize:18, fontWeight:FontWeight.bold, color:Color(0xff222222));
-  TextStyle bodyTextStyle = TextStyle(fontSize:16, color: Color(0xff333333));
+  TextStyle bodyTextStyle = TextStyle(height:1.25, fontSize:16, color: Color(0xff333333));
   TextStyle titleTextStyle = TextStyle(fontSize:18, fontWeight: FontWeight.w600, color: Color(0xff333333));
   TextStyle cardTitleTextStyle = TextStyle(fontSize:16, fontWeight: FontWeight.w600, color: Color(0xff444444));
 

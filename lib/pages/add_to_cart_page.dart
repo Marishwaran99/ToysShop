@@ -1,30 +1,17 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:html/parser.dart';
-import 'package:http/http.dart';
 import 'package:toys_shop/models/product.dart';
-import 'package:toys_shop/pages/product_detail_page.dart';
+import 'package:toys_shop/styles/custom.dart';
+import 'package:toys_shop/widgets/appbar.dart';
+import 'package:toys_shop/widgets/in_section_spacing.dart';
 
-
-// class Product{
-//   String img, discount, url;
-//   Product(this.img, this.discount);
-// }
-class HomePageCarousel extends StatefulWidget {
+class AddToCartPage extends StatefulWidget {
   @override
-  _HomePageCarouselState createState() => _HomePageCarouselState();
+  _AddToCartPageState createState() => _AddToCartPageState();
 }
-class _HomePageCarouselState extends State<HomePageCarousel> {
-  var _activeSlideIndex = 0;
-  List<Product> productsList;
-  @override
-  void initState() {
-    super.initState();
-    getData();
-  }
-  getData() async{
-    productsList = [
+
+class _AddToCartPageState extends State<AddToCartPage> {
+
+  List<Product> productsList = [
       Product(1, 
       'Octopus Shootout',
       "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
@@ -59,76 +46,64 @@ class _HomePageCarouselState extends State<HomePageCarousel> {
       1200,),
       
       ];
-    setState(() {
-      
-    });
-  }
+  Custom custom = Custom();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: MyAppBar(back:false),
+      body:SingleChildScrollView(
+              child: Container(
+          child: Column(
+            children:productsList.map((p){
+              return CartProduct(p);
+            }).toList()
+          )
+    ),
+      ));
+  }  
+}
+
+class CartProduct extends StatefulWidget {
+  final Product product;
+  CartProduct(this.product);
+  @override
+  _CartProductState createState() => _CartProductState(this.product);
+}
+
+class _CartProductState extends State<CartProduct> {
+
+  Product _product;
+  _CartProductState(this._product);
+  Custom custom = Custom();
   @override
   Widget build(BuildContext context) {
     return Container(
-          margin: EdgeInsets.symmetric(horizontal:16),
-          height: 250,
-          child: 
-          productsList != null ? Stack(children: <Widget>[
-            PageView.builder(
-            itemCount: productsList.length,
-            onPageChanged: (i){
-              setState(() {
-                _activeSlideIndex = i;
-              });
-            },
-            itemBuilder:(BuildContext ctx, int i){
-            return ProductCard(productsList[i]);
-          }),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical:8),
-                          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: productsList.map((m){
-              var i = productsList.indexOf(m);
-              return Container(alignment: Alignment.center, width: 8, height: 8, margin: EdgeInsets.symmetric(horizontal:4), decoration: BoxDecoration(borderRadius:BorderRadius.circular(12), color: _activeSlideIndex == i ? Colors.black87:Colors.black45,));
-          }).toList(),),
-            ))
-          ],) : Center(child:CircularProgressIndicator())
-      
-    );
-  }
-}
+      color: Colors.grey[100],
+      margin: EdgeInsets.symmetric(horizontal:16, vertical:8),
+        child:Row(children: <Widget>[
+          Container(width: MediaQuery.of(context).size.width * 0.4,
+          height:150,decoration: BoxDecoration(image:DecorationImage(image: NetworkImage(_product.thumbnailImage)) ),
+        ), 
+        SizedBox(width:8),
+        Column(
+          mainAxisSize:MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:<Widget>[
+            Container(width: MediaQuery.of(context).size.width - MediaQuery.of(context).size.width * 0.4 - 40, child: Text(_product.title,style:custom.bodyTextStyle)),
+            InSectionSpacing(),
+            Text('₹ ' +_product.price.toString(), style: custom.cardTitleTextStyle),
+            InSectionSpacing(),
+            Row(children: <Widget>[
+              GestureDetector(child:Container(color: Colors.grey[200], width: 36, height: 36, child: Center(child: Text('-',style: TextStyle(fontSize:36),))), onTap: (){}),
+              Container(color: Colors.grey[200], width: 36, height: 36, child: Center(child: Text('1',style: TextStyle(fontSize:14),))),
+              GestureDetector(child:Container(color: Colors.grey[200], width: 36, height: 36, child: Center(child: Text('+',style: TextStyle(fontSize:36),))), onTap: (){}),
 
-
-class ProductCard extends StatelessWidget {
-
-  final Product product;
-  ProductCard(this.product);
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext ctx){
-          return ProductPageDetailPage(product)
-        
-      ;}));
-      
-      },
-          child: Stack(
-        children: <Widget>[
-          Container(
-            width:MediaQuery.of(context).size.width,
-            decoration:BoxDecoration(color: Colors.white,image: DecorationImage(image: NetworkImage(product.thumbnailImage)))
-          ),
-          product.discount > 0 ?
-          Align(
-            alignment:Alignment.topLeft,
-            child:Container(width: 64, height: 64, 
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.red[100],
-              borderRadius:BorderRadius.circular(32)
-              
-            ), child: Center(child:Text(product.discount.toString() + "% OFF",style: TextStyle(fontSize:10, fontWeight:FontWeight.bold), ),))
-          ):Container()
-        ],
-      ),
-    );
+              SizedBox(width:16),
+              IconButton(icon: Icon(Icons.delete, color: Colors.black26,), onPressed: (){})
+],)
+            
+          ]
+        )],)
+      );
   }
 }
