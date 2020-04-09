@@ -1,7 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:toys_shop/pages/add_to_cart_page.dart';
 import 'package:toys_shop/pages/home_page.dart';
 import 'package:toys_shop/pages/product_page.dart';
+import 'package:toys_shop/pages/wishlist_page.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/appbar.dart';
 import 'package:toys_shop/widgets/bottom_appbar.dart';
@@ -36,12 +37,12 @@ class _MainPageState extends State<MainPage> {
   List<BarItem> _bottomBarItem = [
     BarItem(title: 'Home', iconData: Icons.home),
     BarItem(title: 'Shop', iconData: Icons.shopping_basket),
-    BarItem(title: 'Cart', iconData: Icons.shopping_cart),
+    BarItem(title: 'Wishlist', iconData: CupertinoIcons.heart_solid),
   ];
   final List<Widget> _screens = [
     HomePage(),
     ProductPage(),
-    AddToCartPage(),
+    WishlistPage(),
   ];
   @override
   Widget build(BuildContext context) {

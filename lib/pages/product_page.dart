@@ -1,5 +1,11 @@
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:toys_shop/dbhelpers/wishlist_dbhelper.dart';
 import 'package:toys_shop/models/product.dart';
+import 'package:toys_shop/models/wishlist.dart';
 import 'package:toys_shop/pages/product_detail_page.dart';
 import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
@@ -16,7 +22,7 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   List<Product> productsList = [
     Product(
-      1,
+      101,
       'Octopus Shootout',
       "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
       0,
@@ -24,7 +30,7 @@ class _ProductPageState extends State<ProductPage> {
       5000,
     ),
     Product(
-      2,
+      102,
       'Osmo Little Genius Starter Kit for iPad',
       "Osmo learning games makes it fun for children to learn, using Toys as Teaching Tools. Osmo is Magic! In 2013, Osmo created a fun-filled & award winning learning games that interact with actual hand held pieces & an iPad Tablet, bringing a child's game pieces & actions to life (No WiFi necessary for game play). Osmo merges tactile exploration with innovative technology, actively engaging children in the learning process. Osmo games develop a wide range of skills, varying skills based on each game, including creativity, problem-solving, confidence gaining, child-led, hands-on, gender-neutral, curriculum inclusion, social/emotional skills, STEM/STEAM (Science, Technology, Engineering Math & Art) and many more educational capabilities. Games are designed for children between the ages of 3-5+ and include beginner to expert levels. OSMO enables the continuation of learning. Parents can track game progress, using child game profiles, on a parent app. Little Genius Starter Kit focuses on the following game play: Preschool letter formation (ABCs), create pictures with sticks/rings (Squiggle Magic), dress/feed a character (Costume Party) & bring animals to life enabling problem solving, learning of letters & creativity (Stories).",
       20,
@@ -32,7 +38,7 @@ class _ProductPageState extends State<ProductPage> {
       2200,
     ),
     Product(
-      3,
+      103,
       'Globber Elite Deluxe Light Up Wheels',
       "The Elite Deluxe is a 3-wheel scooter with a 4-height adjustable T-bar, ergonomic bi-injection TPR handlebar grips and a strong aluminium column for maximum comfort and durability. Patented & safe elliptic folding system to easily store. Effortlessly drag the scooter behind you when not in use thanks to trolley mode. Easily place both feet on our extra-wide reinforced deck for more comfort, which supports up to 50kg. 125mm & 30mm extra-wide PU casted battery-free LED wheels flash in white thanks to dynamo lighting integrated in the wheels' core. The battery-powered deck flashes in red, blue & green for more fun!",
       0,
@@ -40,7 +46,7 @@ class _ProductPageState extends State<ProductPage> {
       1000,
     ),
     Product(
-      4,
+      104,
       'Razor A Scooter',
       "he one, the only, the classic! The folding frame and cool colour options make this the entry-level scooter of choice (for an amazing price!)",
       40,
@@ -48,7 +54,7 @@ class _ProductPageState extends State<ProductPage> {
       2700,
     ),
     Product(
-      5,
+      105,
       '4M Race Car Kit',
       'Be a young mechanical engineer! Learn how the motor works by exploring important mechanisms like pivots, linkages and levers. Connect the circuit to build this amazing Race Car with a sturdy, lightweight and colourful body. Make it your very first project in mechanical science!.Includes a set of pre-cut colourful foam boards, a set of plastic cases, gears and wheels, a motor, a screw, stickers and detailed instructions.',
       0,
@@ -60,8 +66,20 @@ class _ProductPageState extends State<ProductPage> {
   TextEditingController _searchController = TextEditingController();
   var filters = ['Price. Low to High', 'Price. High to Low'];
   Custom custom = Custom();
+  List<Wishlist> inwishlistProductIds;
+  var _dbhelper = WishlistDBHelper();
+
+
+  @override
+  void initState() {
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
+    if (inwishlistProductIds == null){
+      inwishlistProductIds = List<Wishlist>();
+      updateWishlist();
+    }
     return SingleChildScrollView(
       child: Container(
           child: Column(
@@ -72,7 +90,7 @@ class _ProductPageState extends State<ProductPage> {
               Container(
                 width: MediaQuery.of(context).size.width * 0.5,
                 margin: EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadiusDirectional.circular(8)),
@@ -103,11 +121,53 @@ class _ProductPageState extends State<ProductPage> {
           InSectionSpacing(),
           Column(
               children: productsList.map((p) {
-            return ProductCard(p);
+            var w;
+            var id;
+
+            for(var wish in inwishlistProductIds){
+              
+              if (wish.productId == p.id){
+                w = true;
+                id = wish.id;
+              }
+            }
+            log(w.toString());
+            return Stack(children: <Widget>[
+              ProductCard(p),
+              Align(alignment: Alignment.topRight,
+              child: Container(
+                margin: EdgeInsets.only(right:16, top:16),
+                child:GestureDetector(child: Icon(w != null ? w ? CupertinoIcons.heart_solid : CupertinoIcons.heart:CupertinoIcons.heart,size: 32,color: Colors.pink[200],),onTap: () async {
+                  if (id != null){
+                    w = false;
+                    int i = await _dbhelper.deleteWishlist(id);
+                    inwishlistProductIds.removeWhere((w) => w.id == id);
+                    setState(() {
+                      
+                    });
+                  }
+                  else
+                  {int i = await _dbhelper.insertWishlist(Wishlist(productId: p.id));}
+                  updateWishlist();
+                },)
+              ),
+            ),
+            ],); 
           }).toList()),
         ],
       )),
     );
+  }
+  void updateWishlist() {
+    Future<Database> dbFuture = _dbhelper.initializeDatabase();
+    dbFuture.then((database) {
+      Future<List<Wishlist>> wishlistFuture = _dbhelper.getWishlist();
+      wishlistFuture.then((wishlists) {
+        setState(() {
+          inwishlistProductIds.addAll(wishlists);
+        });
+      });
+    });
   }
 }
 
@@ -132,7 +192,7 @@ class _ProductCardState extends State<ProductCard> {
         }));
       },
       child: Container(
-          color: Colors.grey[200],
+          //color: Colors.grey[100],
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: <Widget>[
@@ -158,12 +218,7 @@ class _ProductCardState extends State<ProductCard> {
                     InSectionSpacing(),
                     Text('₹ ' + _product.price.toString(),
                         style: custom.cardTitleTextStyle),
-                    InSectionSpacing(),
-                    FlatButton(
-                        onPressed: () {},
-                        color: Colors.black87,
-                        textColor: Colors.white,
-                        child: Text('Add to Cart')),
+              
                   ])
             ],
           )),

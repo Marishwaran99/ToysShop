@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
@@ -116,10 +117,19 @@ class ProductCard extends StatelessWidget {
             width:MediaQuery.of(context).size.width,
             decoration:BoxDecoration(color: Colors.white,image: DecorationImage(image: NetworkImage(product.thumbnailImage)))
           ),
+          Align(alignment: Alignment.topRight,
+              child: Container(
+                margin: EdgeInsets.only(right:8, top:8),
+                child:GestureDetector(child: Icon(CupertinoIcons.heart,size: 40,),onTap: (){},)
+              ),
+            ),
           product.discount > 0 ?
           Align(
             alignment:Alignment.topLeft,
-            child:Container(width: 64, height: 64, 
+
+            child:Container(
+              margin: EdgeInsets.only(left:8, top:8),
+              width: 64, height: 64, 
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.red[100],

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart';
@@ -68,7 +69,7 @@ class _ProductCarouselState extends State<ProductCarousel> {
   Widget build(BuildContext context) {
     return Container(
           margin: EdgeInsets.symmetric(horizontal:16),
-          height: 300,
+          height: 250,
           child: productsList != null ? productsList.length > 0 ? ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: productsList.length,
@@ -116,10 +117,18 @@ class _ProductCardState extends State<ProductCard> {
                 color: Colors.white,
                 image: DecorationImage(fit: BoxFit.contain, image: NetworkImage(_product.thumbnailImage))
               )
-            ), _product.discount > 0 ?
+            ),
+            Align(alignment: Alignment.topRight,
+              child: Container(
+                margin: EdgeInsets.only(right:8, top:8),
+                child:GestureDetector(child: Icon(CupertinoIcons.heart,size: 32,),onTap: (){},)
+              ),
+            ),
+             _product.discount > 0 ?
           Align(
             alignment:Alignment.topLeft,
             child:Container(width: 56, height: 56, 
+            margin: EdgeInsets.only(top:8, left:8),
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Colors.red[100],
@@ -130,22 +139,21 @@ class _ProductCardState extends State<ProductCard> {
             ,
             Container(
               width: MediaQuery.of(context).size.width,
-              height: 150,
+              height: 100,
               decoration: BoxDecoration(
                 color:Colors.grey[100],
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8),  bottomRight: Radius.circular(8))
               ),
               padding: EdgeInsets.symmetric(horizontal:8),
               child:Column(
-                
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   InSectionSpacing(),
-            Text(_product.title, style: custom.cardTitleTextStyle,),
+            Text(_product.title, style: custom.bodyTextStyle,),
             SizedBox(height:16),
-            Text("₹ " + _product.price.toString(), style: custom.bodyTextStyle,),
-            SizedBox(height:8),
-            IconButton(icon: Icon(Icons.shopping_cart), onPressed: (){},)
+            Text("₹ " + _product.price.toString(), style: custom.cardTitleTextStyle,),
               ],)
             )
             
