@@ -5,12 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:intl/intl.dart';
+import 'package:toys/models/userDetails.dart';
 import 'package:toys/models/users.dart';
+import 'package:toys/pages/home.dart';
 
-final GoogleSignIn googleSignIn = GoogleSignIn();
-final userRef = Firestore.instance.collection("users");
 final DateTime timestamp = DateTime.now();
+final GoogleSignIn _googleSignIn = new GoogleSignIn();
+final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -26,7 +27,6 @@ class _LoginPageState extends State<LoginPage> {
   String _username;
   String _password;
   String _email;
-  User currentUser;
 
   TextEditingController userNameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -34,15 +34,49 @@ class _LoginPageState extends State<LoginPage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  @override
-  void initState() {
-    super.initState();
+  Future<FirebaseUser> _signIn(BuildContext context) async {
+    Scaffold.of(context).showSnackBar(new SnackBar(
+      content: new Text('Sign in'),
+    ));
 
-    googleSignIn.onCurrentUserChanged.listen((account) {
-      handleSignIn(account);
-    }, onError: (err) {
-      print("Error signing in: $err");
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    AuthResult userDetails =
+        await _firebaseAuth.signInWithCredential(credential);
+    ProviderDetails providerInfo =
+        new ProviderDetails(userDetails.additionalUserInfo.providerId);
+
+    List<ProviderDetails> providerData = new List<ProviderDetails>();
+    providerData.add(providerInfo);
+
+    UserDetails details = new UserDetails(
+      userDetails.additionalUserInfo.providerId,
+      userDetails.user.displayName,
+      userDetails.user.photoUrl,
+      userDetails.user.email,
+      providerData,
+    );
+
+    Firestore.instance
+        .collection("users")
+        .document(userDetails.user.uid)
+        .setData({
+      "username": userDetails.user.displayName,
+      "email": userDetails.user.email,
+      "photoUrl": userDetails.user.photoUrl,
+    }).catchError((onError) => print(onError));
+    setState(() {
+      isAuth = true;
+      authResult = userDetails;
     });
+    Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
   }
 
   Widget _buildUsername() {
@@ -91,14 +125,12 @@ class _LoginPageState extends State<LoginPage> {
       onSaved: (String value) {
         _email = value;
       },
-      // onChanged: (value) {
-      //   // print("Email:" + value)
-      // },
     );
   }
 
   Widget _buildPassword() {
     return TextFormField(
+      controller: passwordController,
       decoration: InputDecoration(
           labelText: 'Password',
           icon: Icon(
@@ -184,9 +216,9 @@ class _LoginPageState extends State<LoginPage> {
                     child: RaisedButton(
                         color: Color(0xffE3E3E3),
                         elevation: 0,
-                        onPressed: () {
-                          print("G");
-                        },
+                        onPressed: () => _signIn(context)
+                            .then((user) => print(user))
+                            .catchError((onError) => print("Error:$onError")),
                         child: Stack(
                           children: <Widget>[
                             Text(
@@ -260,45 +292,13 @@ class _LoginPageState extends State<LoginPage> {
                   RaisedButton(
                     color: Theme.of(context).primaryColor,
                     textColor: Colors.white,
-                    onPressed: () {
-                      print(emailController.text);
-
-                      // setState(() {
-                      //   isNew = false;
-                      // });
-                    },
+                    onPressed: createUser,
                     child: Text(
                       "SIGN UP",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(height: 5),
-                  Text("OR"),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    child: RaisedButton(
-                        color: Color(0xffE3E3E3),
-                        elevation: 0,
-                        onPressed: signIn,
-                        child: Stack(
-                          children: <Widget>[
-                            Text(
-                              "SIGN UP USING ",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 100),
-                              child: Image.asset(
-                                'assets/images/G.png',
-                                width: 13,
-                              ),
-                            )
-                          ],
-                        )),
-                  )
                 ],
               )),
           SizedBox(height: 15),
@@ -331,60 +331,55 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Future<void> signIn() async {
-  //   final formState = _formKey.currentState;
-  //   if(formState.validate()){
-  //     formState.save();
-  //     try{
-  //       AuthResult authresult = await FirebaseAuth.instance.signInWithEmailAndPassword(email: _email, password: _password);
-  //       print("Token:${authresult.user.email}");
-  //       setState(() {
-  //         isAuth = true;
-  //         authResult = authresult;
-  //       });
-  //     }catch(e){
-  //       print(e.message);
-  //     }
-  //   }
-  // }
-
-  handleSignIn(GoogleSignInAccount account) async {
-    await createUserInFirestore();
-  }
-
-  createUserInFirestore() async {
-    final GoogleSignInAccount user = googleSignIn.currentUser;
-    DocumentSnapshot doc = await userRef.document(user.id).get();
-
-    if (!doc.exists) {
-      // final username = await Navigator.push(context, MaterialPageRoute(builder: (context) => CreateAccount()));
-
-      userRef.document(user.id).setData({
-        "id": user.id,
-        "username": user.displayName,
-        "photoUrl": user.photoUrl,
-        "email": user.email,
-        "displayName": user.displayName,
-        "bio": "",
-        "timestamp": timestamp
-      });
-
-      doc = await userRef.document(user.id).get();
+  Future<void> signIn() async {
+    final formState = _formKey.currentState;
+    if (formState.validate()) {
+      formState.save();
+      try {
+        AuthResult authresult = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: _email, password: _password);
+        print("Token:${authresult.user.email}");
+        setState(() {
+          isAuth = true;
+          authResult = authresult;
+        });
+      } catch (e) {
+        print(e.message);
+      }
     }
-
-    currentUser = User.fromDocument(doc);
-    print(currentUser);
-    print(currentUser.displayName);
   }
 
-  signIn() async {
-    googleSignIn.onCurrentUserChanged.listen((account) {
-      handleSignIn(account);
-    }, onError: (err) {
-      print("Error signing in: $err");
-    });
-    // await googleSignIn.signIn();
+  Future<void> createUser() async {
+    final formState = _formKey.currentState;
+    if (formState.validate()) {
+      formState.save();
+      try {
+        FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: _email, password: _password)
+            .then((currentUser) => Firestore.instance
+                    .collection("users")
+                    .document(currentUser.user.uid)
+                    .setData({
+                  "uid": currentUser.user.uid,
+                  "username": userNameController.text,
+                  "email": emailController.text,
+                  "photoUrl": "",
+                }))
+            .then((result) => {
+                  emailController.clear(),
+                  passwordController.clear(),
+                  userNameController.clear(),
+                })
+            .catchError((onError) => print(onError))
+            .catchError((onError) => print(onError));
 
+        setState(() {
+          isNew = false;
+        });
+      } catch (e) {
+        print("Error:$e");
+      }
+    }
   }
 
   @override
