@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toys_shop/models/product.dart';
 import 'package:toys_shop/styles/custom.dart';
+import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/appbar.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
 
@@ -58,9 +59,18 @@ class _AddToCartPageState extends State<AddToCartPage> {
     return SingleChildScrollView(
         child: Container(
             child: Column(
-                children: productsList.map((p) {
-      return CartProduct(p);
-    }).toList())));
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: SectionTitle('Your Shopping Cart'),
+        ),
+        Column(
+            children: productsList.map((p) {
+          return CartProduct(p);
+        }).toList()),
+      ],
+    )));
   }
 }
 
