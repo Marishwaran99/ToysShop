@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:toys/pages/cart.dart';
-import 'package:toys/pages/home.dart';
-import 'package:toys/pages/login.dart';
+import 'package:toys/models/userDetails.dart';
+import 'package:toys/pages/add_to_cart_page.dart';
+import 'package:toys/pages/home_page.dart';
+import 'package:toys/pages/profile.dart';
 import 'package:toys/pages/product.dart';
 
 void main() => runApp(MyApp());
@@ -22,7 +24,7 @@ class MyApp extends StatelessWidget {
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.purple[500]),
-            title: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            title: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             subtitle: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -37,16 +39,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+  UserDetails details;
+  MyHomePage({Key key, this.title, this.details}) : super(key: key);
 
   final String title;
 
@@ -58,107 +52,108 @@ class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
 
-  final List<Widget> _children = [
-    Home(),
-    ProductPage(),
-    CartPage(),
-    LoginPage()
-  ];
-
-  static final List<String> _listViewData = [
-    "Login",
-  ];
-
-  void handleTap(int index){
+  void handleTap(int index) {
     setState(() {
-        _currentIndex = index;
-      });
+      _currentIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _children = [
+      HomePage(details: widget.details,),        
+      ProductPage(),
+      AddToCartPage(),
+      LoginPage(
+        details: widget.details,
+      )
+    ];
+
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
           title: Text(
-            widget.title,
+            "TOYS",
             style:
                 TextStyle(color: Theme.of(context).primaryColor, fontSize: 24),
           ),
           elevation: 0,
           backgroundColor: Colors.white,
-          leading: GestureDetector(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Container(
-                      width: 26,
-                      decoration: new BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          left: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          right: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          bottom: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                        ),
-                      )),
-                  SizedBox(height: 4),
-                  Container(
-                      alignment: Alignment.topLeft,
-                      width: 20,
-                      decoration: new BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          left: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          right: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          bottom: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                        ),
-                      )),
-                  SizedBox(height: 4),
-                  Container(
-                      width: 26,
-                      decoration: new BoxDecoration(
-                        border: Border(
-                          top: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          left: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          right: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                          bottom: BorderSide(
-                              width: 1.2,
-                              color: Theme.of(context).primaryColor),
-                        ),
-                      )),
-                  SizedBox(height: 4),
-                ],
-              ),
-            ),
-            onTap: () {
-              _scaffoldKey.currentState.openDrawer();
-            },
-          ),
+          leading: widget.details != null
+              ? GestureDetector(
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                            width: 26,
+                            decoration: new BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                left: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                right: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                bottom: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            )),
+                        SizedBox(height: 4),
+                        Container(
+                            alignment: Alignment.topLeft,
+                            width: 20,
+                            decoration: new BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                left: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                right: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                bottom: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            )),
+                        SizedBox(height: 4),
+                        Container(
+                            width: 26,
+                            decoration: new BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                left: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                right: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                                bottom: BorderSide(
+                                    width: 1.2,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            )),
+                        SizedBox(height: 4),
+                      ],
+                    ),
+                  ),
+                  onTap: () {
+                    _scaffoldKey.currentState.openDrawer();
+                  },
+                )
+              : null,
           actions: <Widget>[
             GestureDetector(
               child: Icon(
@@ -171,46 +166,154 @@ class _MyHomePageState extends State<MyHomePage> {
             )
           ],
         ),
-        drawer: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.7,
-          child: Drawer(
-            child: ListView(
-              padding: EdgeInsets.all(10.0),
-              children: _listViewData
-                  .map((data) => ListTile(
-                        title: Text(data),
-                      ))
-                  .toList(),
-            ),
-          ),
-        ),
+        drawer: widget.details != null
+            ? SizedBox(
+                width: MediaQuery.of(context).size.width * 0.75,
+                child: Drawer(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      UserAccountsDrawerHeader(
+                        decoration: BoxDecoration(
+                          color: Color(0xffECECEC)
+                        ),
+                          accountName: Text(widget.details.userName, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),),
+                          accountEmail: Text(widget.details.userEmail, style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.bold),),
+                          currentAccountPicture: CircleAvatar(
+                            backgroundImage: CachedNetworkImageProvider(
+                                widget.details.photoUrl),
+                          )),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            GestureDetector(
+                              child: Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Icon(FontAwesome.list_alt, size: 18,),
+                                      SizedBox(width :10),
+                                      Text("My Orders", style: Theme.of(context).textTheme.title,),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ),
+                            Divider(
+                              height: 15,
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Icon(FontAwesome.edit, size: 18,),
+                                      SizedBox(width :10),
+                                      Text("Edit Account", style: Theme.of(context).textTheme.title,),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ),
+                            Divider(
+                              height: 15,
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Icon(Ionicons.ios_lock, size: 18,),
+                                      SizedBox(width :10),
+                                      Text("Change Password", style: Theme.of(context).textTheme.title,),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ),
+                            Divider(
+                              height: 15,
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Icon(Ionicons.md_remove_circle, size: 18,),
+                                      SizedBox(width :10),
+                                      Text("Delete Account", style: Theme.of(context).textTheme.title,),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ),
+                            Divider(
+                              height: 15,
+                            ),
+                            GestureDetector(
+                              child: Container(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: <Widget>[
+                                      Icon(FontAwesome.sign_out, size: 18,),
+                                      SizedBox(width :10),
+                                      Text("Logout", style: Theme.of(context).textTheme.title,),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ),
+                            Divider(
+                              height: 15,
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                    ],
+                  ),
+                ),
+              )
+            : null,
         body: _children[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           onTap: handleTap,
           items: [
-            buildBottomNavigationBarItem(context, _currentIndex, 0, Icons.home, "Home"),
-            buildBottomNavigationBarItem(context, _currentIndex, 1, FontAwesome.list, "Products"),
-            buildBottomNavigationBarItem(context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
-            buildBottomNavigationBarItem(context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
+            buildBottomNavigationBarItem(
+                context, _currentIndex, 0, Icons.home, "Home"),
+            buildBottomNavigationBarItem(
+                context, _currentIndex, 1, FontAwesome.list, "Products"),
+            buildBottomNavigationBarItem(
+                context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
+            buildBottomNavigationBarItem(
+                context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
           ],
         ));
   }
 
-  BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context, int _currentIndex,int number,IconData icon, String text) {
+  BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context,
+      int _currentIndex, int number, IconData icon, String text) {
     return BottomNavigationBarItem(
-            icon: new Icon(
-              icon,
-              color: _currentIndex == number
-                  ? Theme.of(context).primaryColor
-                  : Colors.black54,
-            ),
-            title: new Text(
-              text,
-                style: TextStyle(
-                  color: _currentIndex == number
-                      ? Theme.of(context).primaryColor
-                      : Colors.black54,
-                )),
-          );
+      icon: new Icon(
+        icon,
+        color: _currentIndex == number
+            ? Theme.of(context).primaryColor
+            : Colors.black54,
+      ),
+      title: new Text(text,
+          style: TextStyle(
+            color: _currentIndex == number
+                ? Theme.of(context).primaryColor
+                : Colors.black54,
+          )),
+    );
   }
 }

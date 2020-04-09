@@ -5,16 +5,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:toys/main.dart';
 import 'package:toys/models/userDetails.dart';
-import 'package:toys/models/users.dart';
-import 'package:toys/pages/home.dart';
 
 final DateTime timestamp = DateTime.now();
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
 class LoginPage extends StatefulWidget {
-  LoginPage({Key key}) : super(key: key);
+  UserDetails details;
+  LoginPage({Key key, this.details}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -76,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
       isAuth = true;
       authResult = userDetails;
     });
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: details,)));
   }
 
   Widget _buildUsername() {
@@ -158,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget buildAuthScreen() {
     return Column(
       children: <Widget>[
-        Text(authResult.user.email),
+        Text(widget.details.userName),
       ],
     );
   }
@@ -386,6 +386,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: isAuth ? buildAuthScreen() : isNew ? signUp() : login());
+        child: widget.details != null ? buildAuthScreen() : isNew ? signUp() : login());
   }
 }
