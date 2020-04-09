@@ -16,12 +16,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'Josefin',
           primarySwatch: Colors.blue,
-          primaryColor: Colors.black,
+          primaryColor: Colors.purple[500],
           textTheme: TextTheme(
             headline: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black),
+                color: Colors.purple[500]),
             title: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             subtitle: TextStyle(
                 fontSize: 16,
@@ -69,10 +69,10 @@ class _MyHomePageState extends State<MyHomePage> {
     "Login",
   ];
 
-  void handleTap(int index) {
+  void handleTap(int index){
     setState(() {
-      _currentIndex = index;
-    });
+        _currentIndex = index;
+      });
   }
 
   @override
@@ -188,33 +188,29 @@ class _MyHomePageState extends State<MyHomePage> {
         bottomNavigationBar: BottomNavigationBar(
           onTap: handleTap,
           items: [
-            buildBottomNavigationBarItem(
-                context, _currentIndex, 0, Icons.home, "Home"),
-            buildBottomNavigationBarItem(
-                context, _currentIndex, 1, FontAwesome.list, "Products"),
-            buildBottomNavigationBarItem(
-                context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
-            buildBottomNavigationBarItem(
-                context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
+            buildBottomNavigationBarItem(context, _currentIndex, 0, Icons.home, "Home"),
+            buildBottomNavigationBarItem(context, _currentIndex, 1, FontAwesome.list, "Products"),
+            buildBottomNavigationBarItem(context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
+            buildBottomNavigationBarItem(context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
           ],
         ));
   }
 
-  BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context,
-      int _currentIndex, int number, IconData icon, String text) {
+  BottomNavigationBarItem buildBottomNavigationBarItem(BuildContext context, int _currentIndex,int number,IconData icon, String text) {
     return BottomNavigationBarItem(
-      icon: new Icon(
-        icon,
-        color: _currentIndex == number
-            ? Theme.of(context).primaryColor
-            : Colors.black54,
-      ),
-      title: new Text(text,
-          style: TextStyle(
-            color: _currentIndex == number
-                ? Theme.of(context).primaryColor
-                : Colors.black54,
-          )),
-    );
+            icon: new Icon(
+              icon,
+              color: _currentIndex == number
+                  ? Theme.of(context).primaryColor
+                  : Colors.black54,
+            ),
+            title: new Text(
+              text,
+                style: TextStyle(
+                  color: _currentIndex == number
+                      ? Theme.of(context).primaryColor
+                      : Colors.black54,
+                )),
+          );
   }
 }

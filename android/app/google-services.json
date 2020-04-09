@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "428667702844",
+    "firebase_url": "https://toys-c429b.firebaseio.com",
+    "project_id": "toys-c429b",
+    "storage_bucket": "toys-c429b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428667702844:android:9d444c2516f0bdeccffd39",
+        "android_client_info": {
+          "package_name": "com.example.toys"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "428667702844-9t1gtla4mbik47ac1dbvmrl4hu3om04i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.toys",
+            "certificate_hash": "a7f5777727b8a0f413f56ea4f04e484c848ada77"
+          }
+        },
+        {
+          "client_id": "428667702844-urphlkrt48qonvf4mnloaeo61n6d5k3q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvWaLS5LUK7yt7GVAaT4wngvDqDzumy14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "428667702844-urphlkrt48qonvf4mnloaeo61n6d5k3q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
