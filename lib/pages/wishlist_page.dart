@@ -78,7 +78,15 @@ class _WishlistPageState extends State<WishlistPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[SectionTitle('Wishlist'),Padding(
               padding: const EdgeInsets.only(right:16.0),
-              child: FlatButton(onPressed: (){}, child: Text('Clear All')),
+              child: FlatButton(onPressed: (){
+                for(var p in inwishlistProductIds){
+                  _dbhelper.deleteWishlist(p.id);
+                  inwishlistProductIds = [];
+                  setState(() {
+                    
+                  });
+                }
+              }, child: Text('Clear All')),
             )],) 
        , Column(
             children: productsList.map((p) {
