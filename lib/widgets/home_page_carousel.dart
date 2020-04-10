@@ -108,8 +108,7 @@ class ProductCard extends StatelessWidget {
           return ProductPageDetailPage(product)
         
       ;}));
-      
-      },
+            },
           child: Stack(
         children: <Widget>[
           Container(

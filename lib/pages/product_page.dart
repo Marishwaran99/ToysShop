@@ -3,7 +3,6 @@ import 'package:toys/models/product.dart';
 import 'package:toys/pages/product_detail_page.dart';
 import 'package:toys/styles/custom.dart';
 import 'package:toys/widgets/SectionTitle.dart';
-import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/home_page_carousel.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
 import 'package:toys/widgets/section_spacing.dart';

@@ -8,7 +8,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/userDetails.dart';
-import 'package:toys/pages/profile_page.dart';
+import 'package:toys/pages/home_page.dart';
 
 final DateTime timestamp = DateTime.now();
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
@@ -60,6 +60,7 @@ class _LoginPageState extends State<LoginPage> {
             onPressed: () {
               _logout();
               Navigator.of(context).pop();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: widget.details,)));
             },
           ),
           FlatButton(

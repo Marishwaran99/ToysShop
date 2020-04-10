@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
         details: widget.details,
       ),
       ProductPage(),
-      AddToCartPage(),
+      AddToCartPage(details: widget.details,),
       LoginPage(
         details: widget.details,
       )

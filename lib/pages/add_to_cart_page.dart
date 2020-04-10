@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
 import 'package:toys/models/userDetails.dart';
 import 'package:toys/pages/product_detail_page.dart';
 import 'package:toys/pages/profile.dart';
 import 'package:toys/styles/custom.dart';
-import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
 
 class AddToCartPage extends StatefulWidget {
@@ -61,23 +61,23 @@ class _AddToCartPageState extends State<AddToCartPage> {
   @override
   Widget build(BuildContext context) {
     return widget.details == null
-        ? SingleChildScrollView(
-            child: Container(
-                child: Column(
-                    children: productsList.map((p) {
-            return CartProduct(p);
-          }).toList())))
-        : GestureDetector(
+        ? GestureDetector(
             child: Text("Sign In First"),
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => LoginPage(
-                            details: widget.details,
+                      builder: (context) => MyHomePage(
+                            details: widget.details
                           )));
             },
-          );
+          )
+        : SingleChildScrollView(
+            child: Container(
+                child: Column(
+                    children: productsList.map((p) {
+            return CartProduct(p);
+          }).toList())));
   }
 }
 

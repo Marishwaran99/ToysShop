@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:toys/models/product.dart';
 import 'package:toys/styles/custom.dart';
-import 'package:toys/widgets/SectionTitle.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
 import 'package:toys/widgets/section_spacing.dart';
