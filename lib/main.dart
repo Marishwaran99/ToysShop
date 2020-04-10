@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toys_shop/pages/home_page.dart';
+import 'package:toys_shop/pages/login_page.dart';
 import 'package:toys_shop/pages/product_page.dart';
 import 'package:toys_shop/pages/profile_page.dart';
 import 'package:toys_shop/pages/wishlist_page.dart';
@@ -65,10 +66,10 @@ class _MainPageState extends State<MainPage> {
         appBar: MyAppBar(
           back: false,
           onPressed: () {
-            _scaffoldKey.currentState..openDrawer();
+            _scaffoldKey.currentState.openDrawer();
           },
         ),
-        body: _screens[_index],
+        body: LoginPage(),
         bottomNavigationBar: AnimatedBottomBar(
             barItems: _bottomBarItem,
             duration: Duration(milliseconds: 200),
