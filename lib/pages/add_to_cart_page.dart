@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:toys/models/product.dart';
+import 'package:toys/models/userDetails.dart';
+import 'package:toys/pages/product_detail_page.dart';
+import 'package:toys/pages/profile.dart';
 import 'package:toys/styles/custom.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
 
 class AddToCartPage extends StatefulWidget {
+  UserDetails details;
+  AddToCartPage({this.details});
   @override
   _AddToCartPageState createState() => _AddToCartPageState();
 }
@@ -55,12 +60,24 @@ class _AddToCartPageState extends State<AddToCartPage> {
   Custom custom = Custom();
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: Container(
-            child: Column(
-                children: productsList.map((p) {
-      return CartProduct(p);
-    }).toList())));
+    return widget.details == null
+        ? SingleChildScrollView(
+            child: Container(
+                child: Column(
+                    children: productsList.map((p) {
+            return CartProduct(p);
+          }).toList())))
+        : GestureDetector(
+            child: Text("Sign In First"),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => LoginPage(
+                            details: widget.details,
+                          )));
+            },
+          );
   }
 }
 
@@ -82,12 +99,20 @@ class _CartProductState extends State<CartProduct> {
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: <Widget>[
-            Container(
-              width: MediaQuery.of(context).size.width * 0.4,
-              height: 150,
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: NetworkImage(_product.thumbnailImage))),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (BuildContext ctx) {
+                  return ProductPageDetailPage(widget.product);
+                }));
+              },
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.4,
+                height: 150,
+                decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: NetworkImage(_product.thumbnailImage))),
+              ),
             ),
             SizedBox(width: 8),
             Column(

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/userDetails.dart';
+import 'package:toys/pages/profile_page.dart';
 
 final DateTime timestamp = DateTime.now();
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
@@ -33,6 +35,44 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  _logout() {
+    _googleSignIn.signOut();
+    setState(() {
+      isAuth = true;
+      widget.details = null;
+    });
+  }
+
+  showAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context){
+        return AlertDialog(
+        title: Text("LOGOUT",
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+            )),
+        content: Text("Are you sure want to logout?"),
+        actions: <Widget>[
+          FlatButton(
+            child: Text("YES", style: TextStyle(color: Colors.black),),
+            onPressed: () {
+              _logout();
+              Navigator.of(context).pop();
+            },
+          ),
+          FlatButton(
+            child: Text("NO", style: TextStyle(color:Colors.black)),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+      },
+    );
+  }
 
   Future<FirebaseUser> _signIn(BuildContext context) async {
     Scaffold.of(context).showSnackBar(new SnackBar(
@@ -76,7 +116,12 @@ class _LoginPageState extends State<LoginPage> {
       isAuth = true;
       authResult = userDetails;
     });
-    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: details,)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MyHomePage(
+                  details: details,
+                )));
   }
 
   Widget _buildUsername() {
@@ -156,177 +201,351 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget buildAuthScreen() {
-    return Column(
+    return ListView(
       children: <Widget>[
-        Text(widget.details.userName),
+        Container(
+          width: MediaQuery.of(context).size.width,
+          color: Theme.of(context).primaryColor,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10.0),
+            child: Column(
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(70)),
+                      child: CircleAvatar(
+                        radius: 35,
+                        backgroundImage:
+                            CachedNetworkImageProvider(widget.details.photoUrl),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          widget.details.userName,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, letterSpacing: 2),
+                        ),
+                        Text(widget.details.userEmail),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Column(
+                      children: <Widget>[
+                        Icon(
+                          FontAwesome.list_alt,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "Orders",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Icon(
+                          FontAwesome.edit,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "Edit",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Icon(
+                          Ionicons.ios_lock,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "Change",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Icon(
+                          Icons.delete,
+                          size: 28,
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          "Delete",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        print("Logout");
+                        showAlert(context);
+                      },
+                      child: Column(
+                        children: <Widget>[
+                          Icon(
+                            FontAwesome.sign_out,
+                            size: 28,
+                            color: Colors.white,
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            "Logout",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+        Wrap(
+          alignment: WrapAlignment.center,
+          children: <Widget>[
+            itemCard("Pending Payment", 5, Icons.payment),
+            itemCard("To be shipped", 3, Ionicons.ios_warning),
+            itemCard("To be Received", 8, FontAwesome.truck),
+            itemCard("Return / Replace", 0, Icons.assignment_return)
+          ],
+        ),
+        buildListTile("Gift Card", Icons.card_giftcard, Color(0xFFfcd221),
+            Color(0xfffff7d6)),
+        buildListTile(
+            "Favourites", Icons.favorite, Color(0xffFF0000), Color(0xfff5a2a2)),
+        buildListTile(
+            "Coupon", Icons.card_giftcard, Color(0xff2427ff), Color(0xffadafff))
       ],
     );
   }
 
+  ListTile buildListTile(
+      String text, IconData icon, Color color, Color bgColor) {
+    return ListTile(
+      leading: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50), color: bgColor),
+          child: Icon(
+            icon,
+            color: color,
+          )),
+      title: Text(text),
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        size: 12,
+      ),
+    );
+  }
+
   Widget login() {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-              alignment: Alignment.topLeft,
-              child: Text(
-                "LOGIN",
-                style: Theme.of(context).textTheme.headline,
-              )),
-          SizedBox(height: 20),
-          Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  _buildEmail(),
-                  _buildPassword(),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      RaisedButton(
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        onPressed: signIn,
-                        child: Text(
-                          "LOGIN",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: GestureDetector(
-                            onTap: () {
-                              print("Forget Password");
-                            },
-                            child: Text(
-                              "Forget Password ?",
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 18),
-                            )),
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 5),
-                  Text("OR"),
-                  SizedBox(height: 5),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    child: RaisedButton(
-                        color: Color(0xffE3E3E3),
-                        elevation: 0,
-                        onPressed: () => _signIn(context)
-                            .then((user) => print(user))
-                            .catchError((onError) => print("Error:$onError")),
-                        child: Stack(
-                          children: <Widget>[
-                            Text(
-                              "LOGIN USING ",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 90),
-                              child: Image.asset(
-                                'assets/images/G.png',
-                                width: 13,
-                              ),
-                            )
-                          ],
-                        )),
-                  )
-                ],
-              )),
-          SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                "Not have an account ? ",
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isNew = true;
-                    });
-                  },
-                  child: Text("Sign Up",
-                      style: TextStyle(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "LOGIN",
+                  style: Theme.of(context).textTheme.headline,
+                )),
+            SizedBox(height: 20),
+            Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    _buildEmail(),
+                    _buildPassword(),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        RaisedButton(
                           color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)))
-            ],
-          )
-        ],
+                          textColor: Colors.white,
+                          onPressed: signIn,
+                          child: Text(
+                            "LOGIN",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: GestureDetector(
+                              onTap: () {
+                                print("Forget Password");
+                              },
+                              child: Text(
+                                "Forget Password ?",
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 18),
+                              )),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 5),
+                    Text("OR"),
+                    SizedBox(height: 5),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: RaisedButton(
+                          color: Color(0xffE3E3E3),
+                          elevation: 0,
+                          onPressed: () => _signIn(context)
+                              .then((user) => print(user))
+                              .catchError((onError) => print("Error:$onError")),
+                          child: Stack(
+                            children: <Widget>[
+                              Text(
+                                "LOGIN USING ",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 90),
+                                child: Image.asset(
+                                  'assets/images/G.png',
+                                  width: 13,
+                                ),
+                              )
+                            ],
+                          )),
+                    )
+                  ],
+                )),
+            SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Not have an account ? ",
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                SizedBox(width: 10),
+                GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isNew = true;
+                      });
+                    },
+                    child: Text("Sign Up",
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)))
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget signUp() {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Container(
-              alignment: Alignment.topLeft,
-              child: Text(
-                "SIGN UP",
-                style: Theme.of(context).textTheme.headline,
-              )),
-          SizedBox(height: 20),
-          Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  _buildUsername(),
-                  _buildEmail(),
-                  _buildPassword(),
-                  SizedBox(height: 20),
-                  RaisedButton(
-                    color: Theme.of(context).primaryColor,
-                    textColor: Colors.white,
-                    onPressed: createUser,
-                    child: Text(
-                      "SIGN UP",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "SIGN UP",
+                  style: Theme.of(context).textTheme.headline,
+                )),
+            SizedBox(height: 20),
+            Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    _buildUsername(),
+                    _buildEmail(),
+                    _buildPassword(),
+                    SizedBox(height: 20),
+                    RaisedButton(
+                      color: Theme.of(context).primaryColor,
+                      textColor: Colors.white,
+                      onPressed: createUser,
+                      child: Text(
+                        "SIGN UP",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 5),
-                ],
-              )),
-          SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                "Already have an account ? ",
-                style: TextStyle(
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
-              ),
-              SizedBox(width: 10),
-              GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      isNew = false;
-                    });
-                  },
-                  child: Text("LOGIN",
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)))
-            ],
-          )
-        ],
+                    SizedBox(height: 5),
+                  ],
+                )),
+            SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "Already have an account ? ",
+                  style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16),
+                ),
+                SizedBox(width: 10),
+                GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isNew = false;
+                      });
+                    },
+                    child: Text("LOGIN",
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16)))
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -384,8 +603,55 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    return widget.details != null
+        ? buildAuthScreen()
+        : isNew ? signUp() : login();
+  }
+
+  Widget itemCard(String text, int number, IconData icon) {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25),
-        child: widget.details != null ? buildAuthScreen() : isNew ? signUp() : login());
+        padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5),
+        child: Material(
+            borderRadius: BorderRadius.circular(5.0),
+            elevation: 3.0,
+            child: Container(
+                width: MediaQuery.of(context).size.width * 0.45,
+                height: 150.0,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10.0)),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(width: 10.0),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Icon(
+                          icon,
+                          size: 30,
+                        ),
+                        SizedBox(height: 7.0),
+                        Text(
+                          text,
+                          style: TextStyle(
+                              fontFamily: 'Quicksand',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                              color: Colors.grey),
+                        ),
+                        SizedBox(height: 7.0),
+                        Text(
+                          number.toString(),
+                          style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0,
+                              color: Colors.red),
+                        )
+                      ],
+                    )
+                  ],
+                ))));
   }
 }
