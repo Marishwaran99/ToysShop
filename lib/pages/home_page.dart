@@ -19,13 +19,20 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SectionSpacing(),
-          SectionTitle("Best Sellers"),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SectionTitle("Best Sellers"),
+          ),
           InSectionSpacing(),
           HomePageCarousel(),
           SectionSpacing(),
-          SectionTitle("Top Products"),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SectionTitle("Top Products"),
+          ),
           InSectionSpacing(),
-          ProductCarousel()
+          ProductCarousel(),
+          SectionSpacing()
         ],
       ),
     ));

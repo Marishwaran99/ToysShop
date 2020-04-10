@@ -68,54 +68,56 @@ class _WishlistPageState extends State<WishlistPage> {
       inwishlistProductIds = List<Wishlist>();
       updateWishlist();
     }
-    return SingleChildScrollView(
-        child: Container(
-            child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+        appBar: MyAppBar(),
+        body: SingleChildScrollView(
+            child: Container(
+                child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            SectionTitle('Wishlist'),
-            Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: FlatButton(
-                  onPressed: () {
-                    for (var p in inwishlistProductIds) {
-                      _dbhelper.deleteWishlist(p.id);
-                      inwishlistProductIds = [];
-                      setState(() {});
-                    }
-                  },
-                  child: Text('Clear All')),
-            )
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                SectionTitle('Wishlist'),
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: FlatButton(
+                      onPressed: () {
+                        for (var p in inwishlistProductIds) {
+                          _dbhelper.deleteWishlist(p.id);
+                          inwishlistProductIds = [];
+                          setState(() {});
+                        }
+                      },
+                      child: Text('Clear All')),
+                )
+              ],
+            ),
+            Column(
+                children: productsList.map((p) {
+              var w = false;
+              var id;
+              for (var wish in inwishlistProductIds) {
+                log(wish.productId.toString());
+                if (wish.productId == p.id) {
+                  w = true;
+                  id = wish.id;
+                  setState(() {});
+                }
+              }
+              return w
+                  ? WishlistProduct(p, () {
+                      if (id != null) {
+                        _dbhelper.deleteWishlist(id);
+                        inwishlistProductIds
+                            .removeWhere((w) => w.productId == p.id);
+                        setState(() {});
+                      }
+                    })
+                  : Container();
+            }).toList()),
           ],
-        ),
-        Column(
-            children: productsList.map((p) {
-          var w = false;
-          var id;
-          for (var wish in inwishlistProductIds) {
-            log(wish.productId.toString());
-            if (wish.productId == p.id) {
-              w = true;
-              id = wish.id;
-              setState(() {});
-            }
-          }
-          return w
-              ? WishlistProduct(p, () {
-                  if (id != null) {
-                    _dbhelper.deleteWishlist(id);
-                    inwishlistProductIds
-                        .removeWhere((w) => w.productId == p.id);
-                    setState(() {});
-                  }
-                })
-              : Container();
-        }).toList()),
-      ],
-    )));
+        ))));
   }
 
   void updateWishlist() {

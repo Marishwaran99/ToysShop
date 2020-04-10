@@ -122,8 +122,6 @@ class _ProductPageState extends State<ProductPage> {
               )
             ],
           ),
-          SectionTitle('Products'),
-          InSectionSpacing(),
           Column(
               children: productsList.map((p) {
             var w;
@@ -142,7 +140,7 @@ class _ProductPageState extends State<ProductPage> {
                 Align(
                   alignment: Alignment.topRight,
                   child: Container(
-                      margin: EdgeInsets.only(right: 16, top: 16),
+                      margin: EdgeInsets.only(right: 24, top: 16),
                       child: GestureDetector(
                         child: Icon(
                           w != null
@@ -209,7 +207,7 @@ class _ProductCardState extends State<ProductCard> {
         }));
       },
       child: Container(
-          //color: Colors.grey[100],
+          color: Colors.grey[100],
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             children: <Widget>[
