@@ -3,11 +3,14 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/userDetails.dart';
+import 'package:toys/pages/add_to_cart_page.dart';
+import 'package:toys/pages/edit_page.dart';
 import 'package:toys/pages/home_page.dart';
 
 final DateTime timestamp = DateTime.now();
@@ -128,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
       children: <Widget>[
         Container(
           width: MediaQuery.of(context).size.width,
-          color: Theme.of(context).primaryColor,
+          // color: Theme.of(context).primaryColor,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10.0),
             child: Column(
@@ -166,97 +169,11 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Icon(
-                          FontAwesome.list_alt,
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "Orders",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Icon(
-                          FontAwesome.edit,
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "Edit",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Icon(
-                          Ionicons.ios_lock,
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "Change",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Icon(
-                          Icons.delete,
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                        SizedBox(height: 5),
-                        Text(
-                          "Delete",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        print("Logout");
-                        showAlert(context);
-                      },
-                      child: Column(
-                        children: <Widget>[
-                          Icon(
-                            FontAwesome.sign_out,
-                            size: 28,
-                            color: Colors.white,
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            "Logout",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
+                    ActionCard(Icons.list, "Orders", () {}),
+                    ActionCard(Icons.edit, "Edit", () {Navigator.push(context, MaterialPageRoute(builder: (context) => EditPage(details: widget.details,)));}),
+                    ActionCard(CupertinoIcons.heart_solid, "Wishlist", () {}),
+                    ActionCard(Icons.exit_to_app, "Logout", () {showAlert(context);}),
+                  
                   ],
                 )
               ],
@@ -568,6 +485,7 @@ class _LoginPageState extends State<LoginPage> {
           userDetails.additionalUserInfo.providerId,
           doc.data['displayName'],
           doc.data['photoUrl'],
+          userDetails.user.uid,
           userDetails.user.email,
           providerData,
         );
@@ -650,6 +568,7 @@ class _LoginPageState extends State<LoginPage> {
       userDetails.additionalUserInfo.providerId,
       userDetails.user.displayName,
       userDetails.user.photoUrl,
+      userDetails.user.uid,
       userDetails.user.email,
       providerData,
     );
@@ -674,4 +593,28 @@ class _LoginPageState extends State<LoginPage> {
                 )));
   }
 
+}
+
+class ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final GestureTapCallback onPressed;
+
+  ActionCard(this.icon, this.title, this.onPressed);
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(4),
+      onTap: onPressed,
+      child: Container(
+        width: 64,
+        height: 48,
+        decoration: BoxDecoration(
+            color: Colors.grey[100], borderRadius: BorderRadius.circular(4)),
+        child: Center(
+          child: Icon(icon),
+        ),
+      ),
+    );
+  }
 }

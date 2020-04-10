@@ -18,12 +18,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'Josefin',
           primarySwatch: Colors.blue,
-          primaryColor: Color(0xFFFEE16D),
+          primaryColor: Colors.black,
           textTheme: TextTheme(
             headline: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFFEE16D)),
+                color: Colors.black),
             title: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             subtitle: TextStyle(
                 fontSize: 16,
@@ -78,11 +78,11 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(
             "TOYS",
-            style: TextStyle(color: Colors.white, fontSize: 24),
+            style: TextStyle(color: Theme.of(context).primaryColor, letterSpacing: 2, fontSize: 24),
           ),
           elevation: 0,
           automaticallyImplyLeading: false,
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Colors.white,
           actions: <Widget>[
             GestureDetector(
               child: Icon(
