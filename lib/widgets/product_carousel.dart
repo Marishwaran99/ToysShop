@@ -12,15 +12,12 @@ import 'package:toys_shop/pages/product_detail_page.dart';
 import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
 
-
-
 class ProductCarousel extends StatefulWidget {
   @override
   _ProductCarouselState createState() => _ProductCarouselState();
 }
 
 class _ProductCarouselState extends State<ProductCarousel> {
-  
   List<Product> productsList = [
     Product(
       101,
@@ -66,7 +63,7 @@ class _ProductCarouselState extends State<ProductCarousel> {
 
   List<Wishlist> inwishlistProductIds;
   var _dbhelper = WishlistDBHelper();
-   void updateWishlist() {
+  void updateWishlist() {
     Future<Database> dbFuture = _dbhelper.initializeDatabase();
     dbFuture.then((database) {
       Future<List<Wishlist>> wishlistFuture = _dbhelper.getWishlist();
@@ -81,54 +78,67 @@ class _ProductCarouselState extends State<ProductCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if(inwishlistProductIds == null){
+    if (inwishlistProductIds == null) {
       inwishlistProductIds = [];
       updateWishlist();
     }
     return Container(
-          margin: EdgeInsets.symmetric(horizontal:16),
-          height: 250,
-          child: productsList != null ? productsList.length > 0 ? ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: productsList.length,
-            itemBuilder: (BuildContext ctx, int i){
+        margin: EdgeInsets.symmetric(horizontal: 16),
+        height: 250,
+        child: productsList != null
+            ? productsList.length > 0
+                ? ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: productsList.length,
+                    itemBuilder: (BuildContext ctx, int i) {
+                      var w;
+                      var id;
 
-            var w;
-            var id;
-
-            for(var wish in inwishlistProductIds){
-              
-              if (wish.productId == productsList[i].id){
-                w = true;
-                id = wish.id;
-              }
-            }
-            return Stack(children: <Widget>[ProductCard(productsList[i]), Align(alignment: Alignment.topRight,
-              child: Container(
-                margin: EdgeInsets.only(left:8, top:8),
-                child:GestureDetector(child: Icon(w != null ? w ? CupertinoIcons.heart_solid : CupertinoIcons.heart:CupertinoIcons.heart,size: 32,color: Colors.pink[200],),onTap: () async {
-                  if (id != null){
-                    w = false;
-                    _dbhelper.deleteWishlist(id);
-                    inwishlistProductIds.removeWhere((w) => w.id == id);
-                    setState(() {
-                      
-                    }); 
-                  }
-                  else
-                  {_dbhelper.insertWishlist(Wishlist(productId: productsList[i].id));}
-                  updateWishlist();
-                },)
-              ),
-              ),
-             ]) ;
-          }):Container() : Center(child: CircularProgressIndicator())
-    );
+                      for (var wish in inwishlistProductIds) {
+                        if (wish.productId == productsList[i].id) {
+                          w = true;
+                          id = wish.id;
+                        }
+                      }
+                      return Stack(children: <Widget>[
+                        ProductCard(productsList[i]),
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Container(
+                              margin: EdgeInsets.only(left: 8, top: 8),
+                              child: GestureDetector(
+                                child: Icon(
+                                  w != null
+                                      ? w
+                                          ? CupertinoIcons.heart_solid
+                                          : CupertinoIcons.heart
+                                      : CupertinoIcons.heart,
+                                  size: 32,
+                                  color: Colors.pink[200],
+                                ),
+                                onTap: () async {
+                                  if (id != null) {
+                                    w = false;
+                                    _dbhelper.deleteWishlist(id);
+                                    inwishlistProductIds
+                                        .removeWhere((w) => w.id == id);
+                                    setState(() {});
+                                  } else {
+                                    _dbhelper.insertWishlist(Wishlist(
+                                        productId: productsList[i].id));
+                                  }
+                                  updateWishlist();
+                                },
+                              )),
+                        ),
+                      ]);
+                    })
+                : Container()
+            : Center(child: CircularProgressIndicator()));
   }
 }
 
 class ProductCard extends StatefulWidget {
-
   final Product product;
 
   ProductCard(this.product);
@@ -137,71 +147,84 @@ class ProductCard extends StatefulWidget {
 }
 
 class _ProductCardState extends State<ProductCard> {
-  
   Product _product;
   _ProductCardState(this._product);
   Custom custom = Custom();
-  
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext ctx){
-          return ProductPageDetailPage(_product)
-        
-      ;}));
+      onTap: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext ctx) {
+          return ProductPageDetailPage(_product);
+        }));
       },
-          child: Container(
-        width: MediaQuery.of(context).size.width * 0.6,
-        margin: EdgeInsets.only(right:16),
-        child:Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Stack(children: <Widget>[
-              Container(
-              height:150,
-              decoration:BoxDecoration(
-                color: Colors.white,
-                image: DecorationImage(fit: BoxFit.contain, image: NetworkImage(_product.thumbnailImage))
-              )
-            ),
-            
-             _product.discount > 0 ?
-          Align(
-            alignment:Alignment.topRight,
-            child:Container(width: 56, height: 56, 
-            margin: EdgeInsets.only(top:8, left:8),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.red[100],
-              borderRadius:BorderRadius.circular(32)
-              
-            ), child: Center(child:Text(_product.discount.toString() + "% OFF",style: TextStyle(fontSize:10, fontWeight:FontWeight.bold), ),))
-          ):Container()],)
-            ,
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: 100,
-              decoration: BoxDecoration(
-                color:Colors.grey[100],
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8),  bottomRight: Radius.circular(8))
-              ),
-              padding: EdgeInsets.symmetric(horizontal:8),
-              child:Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
+      child: Container(
+          width: MediaQuery.of(context).size.width * 0.6,
+          margin: EdgeInsets.only(right: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Stack(
                 children: <Widget>[
-                  InSectionSpacing(),
-            Text(_product.title, style: custom.bodyTextStyle,),
-            SizedBox(height:16),
-            Text("₹ " + _product.price.toString(), style: custom.cardTitleTextStyle,),
-              ],)
-            )
-            
-          ],
-        )
-      ),
+                  Container(
+                      height: 150,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          image: DecorationImage(
+                              fit: BoxFit.contain,
+                              image: NetworkImage(_product.thumbnailImage)))),
+                  _product.discount > 0
+                      ? Align(
+                          alignment: Alignment.topRight,
+                          child: Container(
+                              width: 56,
+                              height: 56,
+                              margin: EdgeInsets.only(top: 0, left: 8),
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  color: Colors.red[100],
+                                  borderRadius: BorderRadius.circular(32)),
+                              child: Center(
+                                child: Text(
+                                  _product.discount.toString() + "% OFF",
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )))
+                      : Container()
+                ],
+              ),
+              Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 100,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(8),
+                          bottomRight: Radius.circular(8))),
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      InSectionSpacing(),
+                      Text(
+                        _product.title,
+                        style: custom.bodyTextStyle,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        "₹ " + _product.price.toString(),
+                        style: custom.cardTitleTextStyle,
+                      ),
+                    ],
+                  ))
+            ],
+          )),
     );
   }
 }

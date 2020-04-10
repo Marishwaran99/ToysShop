@@ -64,7 +64,7 @@ class _WishlistPageState extends State<WishlistPage> {
   Custom custom = Custom();
   @override
   Widget build(BuildContext context) {
-    if (inwishlistProductIds == null){
+    if (inwishlistProductIds == null) {
       inwishlistProductIds = List<Wishlist>();
       updateWishlist();
     }
@@ -73,45 +73,51 @@ class _WishlistPageState extends State<WishlistPage> {
             child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[SectionTitle('Wishlist'),Padding(
-              padding: const EdgeInsets.only(right:16.0),
-              child: FlatButton(onPressed: (){
-                for(var p in inwishlistProductIds){
-                  _dbhelper.deleteWishlist(p.id);
-                  inwishlistProductIds = [];
-                  setState(() {
-                    
-                  });
-                }
-              }, child: Text('Clear All')),
-            )],) 
-       , Column(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            SectionTitle('Wishlist'),
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: FlatButton(
+                  onPressed: () {
+                    for (var p in inwishlistProductIds) {
+                      _dbhelper.deleteWishlist(p.id);
+                      inwishlistProductIds = [];
+                      setState(() {});
+                    }
+                  },
+                  child: Text('Clear All')),
+            )
+          ],
+        ),
+        Column(
             children: productsList.map((p) {
-            var w = false;
-            var id;
-            for(var wish in inwishlistProductIds){
-              log(wish.productId.toString());
-              if (wish.productId == p.id){
-                w = true;
-                id = wish.id;
-              }
+          var w = false;
+          var id;
+          for (var wish in inwishlistProductIds) {
+            log(wish.productId.toString());
+            if (wish.productId == p.id) {
+              w = true;
+              id = wish.id;
+              setState(() {});
             }
-          return w ? WishlistProduct(p,(){
-            if (id != null){
-              _dbhelper.deleteWishlist(id);
-              inwishlistProductIds.removeWhere((w) => w.productId == p.id);
-              setState(() {
-                
-              });
-            }
-          }) : Container();
+          }
+          return w
+              ? WishlistProduct(p, () {
+                  if (id != null) {
+                    _dbhelper.deleteWishlist(id);
+                    inwishlistProductIds
+                        .removeWhere((w) => w.productId == p.id);
+                    setState(() {});
+                  }
+                })
+              : Container();
         }).toList()),
       ],
     )));
   }
+
   void updateWishlist() {
     Future<Database> dbFuture = _dbhelper.initializeDatabase();
     dbFuture.then((database) {
@@ -131,7 +137,8 @@ class WishlistProduct extends StatefulWidget {
   final GestureTapCallback onPressed;
   WishlistProduct(this.product, this.onPressed);
   @override
-  _WishlistProductState createState() => _WishlistProductState(this.product, this.onPressed);
+  _WishlistProductState createState() =>
+      _WishlistProductState(this.product, this.onPressed);
 }
 
 class _WishlistProductState extends State<WishlistProduct> {
@@ -139,11 +146,10 @@ class _WishlistProductState extends State<WishlistProduct> {
   GestureTapCallback _onPressed;
   _WishlistProductState(this._product, this._onPressed);
   Custom custom = Custom();
-  WishlistDBHelper _wishlistDBHelper = WishlistDBHelper();
   @override
   Widget build(BuildContext context) {
     return Container(
-        color: Colors.white54,
+        color: Colors.grey[100],
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           children: <Widget>[
@@ -152,6 +158,7 @@ class _WishlistProductState extends State<WishlistProduct> {
               height: 150,
               decoration: BoxDecoration(
                   image: DecorationImage(
+                      fit: BoxFit.cover,
                       image: NetworkImage(_product.thumbnailImage))),
             ),
             SizedBox(width: 8),
@@ -167,15 +174,13 @@ class _WishlistProductState extends State<WishlistProduct> {
                   InSectionSpacing(),
                   Text('₹ ' + _product.price.toString(),
                       style: custom.cardTitleTextStyle),
-            SizedBox(height:8),
-                      IconButton(
-                          icon: Icon(
-                            Icons.delete,
-                            color: Colors.black26,
-                          ),
-                          onPressed:_onPressed)
-                    
-                  
+                  SizedBox(height: 8),
+                  IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.black26,
+                      ),
+                      onPressed: _onPressed)
                 ])
           ],
         ));

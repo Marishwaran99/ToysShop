@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toys_shop/pages/home_page.dart';
 import 'package:toys_shop/pages/product_page.dart';
+import 'package:toys_shop/pages/profile_page.dart';
 import 'package:toys_shop/pages/wishlist_page.dart';
+import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/appbar.dart';
 import 'package:toys_shop/widgets/bottom_appbar.dart';
@@ -33,21 +37,37 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   int _index = 0;
-  List<BarItem> _bottomBarItem = [
-    BarItem(title: 'Home', iconData: Icons.home),
-    BarItem(title: 'Shop', iconData: Icons.shopping_basket),
-    BarItem(title: 'Wishlist', iconData: CupertinoIcons.heart_solid),
+  // List<Map<String,> _drawerItem = [
+  //   BarItem(title: 'Home', iconData: Icons.home),
+  //   BarItem(title: 'Products', iconData: Icons.shopping_basket),
+  //   BarItem(title: 'Wishlist', iconData: CupertinoIcons.heart_solid),
+  // ];
+  List<IconData> _bottomBarItem = [
+    Icons.home,
+    Icons.shopping_basket,
+    Icons.shopping_cart,
+    CupertinoIcons.person_solid
   ];
+  Custom custom = Custom();
   final List<Widget> _screens = [
     HomePage(),
     ProductPage(),
     WishlistPage(),
+    ProfilePage()
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: MyAppBar(back: false),
+        backgroundColor: Colors.white,
+        key: _scaffoldKey,
+        appBar: MyAppBar(
+          back: false,
+          onPressed: () {
+            _scaffoldKey.currentState..openDrawer();
+          },
+        ),
         body: _screens[_index],
         bottomNavigationBar: AnimatedBottomBar(
             barItems: _bottomBarItem,

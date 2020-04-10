@@ -69,14 +69,14 @@ class _ProductPageState extends State<ProductPage> {
   List<Wishlist> inwishlistProductIds;
   var _dbhelper = WishlistDBHelper();
 
-
   @override
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
-    if (inwishlistProductIds == null){
+    if (inwishlistProductIds == null) {
       inwishlistProductIds = List<Wishlist>();
       updateWishlist();
     }
@@ -91,13 +91,18 @@ class _ProductPageState extends State<ProductPage> {
                 width: MediaQuery.of(context).size.width * 0.5,
                 margin: EdgeInsets.only(left: 16, top: 16, bottom: 16),
                 padding: EdgeInsets.symmetric(horizontal: 8),
+                height: 48,
                 decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadiusDirectional.circular(8)),
-                child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                        hintText: 'Search', border: InputBorder.none)),
+                child: Center(
+                    child: TextField(
+                        style: custom.bodyTextStyle,
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                            hintStyle: custom.bodyTextStyle,
+                            hintText: 'Search',
+                            border: InputBorder.none))),
               ),
               Container(
                 margin: EdgeInsets.only(left: 8),
@@ -124,40 +129,52 @@ class _ProductPageState extends State<ProductPage> {
             var w;
             var id;
 
-            for(var wish in inwishlistProductIds){
-              
-              if (wish.productId == p.id){
+            for (var wish in inwishlistProductIds) {
+              if (wish.productId == p.id) {
                 w = true;
                 id = wish.id;
               }
             }
             log(w.toString());
-            return Stack(children: <Widget>[
-              ProductCard(p),
-              Align(alignment: Alignment.topRight,
-              child: Container(
-                margin: EdgeInsets.only(right:16, top:16),
-                child:GestureDetector(child: Icon(w != null ? w ? CupertinoIcons.heart_solid : CupertinoIcons.heart:CupertinoIcons.heart,size: 32,color: Colors.pink[200],),onTap: () async {
-                  if (id != null){
-                    w = false;
-                    int i = await _dbhelper.deleteWishlist(id);
-                    inwishlistProductIds.removeWhere((w) => w.id == id);
-                    setState(() {
-                      
-                    });
-                  }
-                  else
-                  {int i = await _dbhelper.insertWishlist(Wishlist(productId: p.id));}
-                  updateWishlist();
-                },)
-              ),
-            ),
-            ],); 
+            return Stack(
+              children: <Widget>[
+                ProductCard(p),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Container(
+                      margin: EdgeInsets.only(right: 16, top: 16),
+                      child: GestureDetector(
+                        child: Icon(
+                          w != null
+                              ? w
+                                  ? CupertinoIcons.heart_solid
+                                  : CupertinoIcons.heart
+                              : CupertinoIcons.heart,
+                          size: 32,
+                          color: Colors.pink[200],
+                        ),
+                        onTap: () async {
+                          if (id != null) {
+                            w = false;
+                            int i = await _dbhelper.deleteWishlist(id);
+                            inwishlistProductIds.removeWhere((w) => w.id == id);
+                            setState(() {});
+                          } else {
+                            int i = await _dbhelper
+                                .insertWishlist(Wishlist(productId: p.id));
+                          }
+                          updateWishlist();
+                        },
+                      )),
+                ),
+              ],
+            );
           }).toList()),
         ],
       )),
     );
   }
+
   void updateWishlist() {
     Future<Database> dbFuture = _dbhelper.initializeDatabase();
     dbFuture.then((database) {
@@ -218,7 +235,6 @@ class _ProductCardState extends State<ProductCard> {
                     InSectionSpacing(),
                     Text('₹ ' + _product.price.toString(),
                         style: custom.cardTitleTextStyle),
-              
                   ])
             ],
           )),
