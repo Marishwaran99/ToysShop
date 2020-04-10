@@ -36,95 +36,14 @@ class _LoginPageState extends State<LoginPage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  _logout() {
-    _googleSignIn.signOut();
-    setState(() {
-      isAuth = true;
-      widget.details = null;
-    });
+  @override
+  Widget build(BuildContext context) {
+    return widget.details != null
+        ? buildAuthScreen()
+        : isNew ? signUp() : login();
   }
 
-  showAlert(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context){
-        return AlertDialog(
-        title: Text("LOGOUT",
-            style: TextStyle(
-              color: Theme.of(context).primaryColor,
-            )),
-        content: Text("Are you sure want to logout?"),
-        actions: <Widget>[
-          FlatButton(
-            child: Text("YES", style: TextStyle(color: Colors.black),),
-            onPressed: () {
-              _logout();
-              Navigator.of(context).pop();
-              Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: widget.details,)));
-            },
-          ),
-          FlatButton(
-            child: Text("NO", style: TextStyle(color:Colors.black)),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-      },
-    );
-  }
-
-  Future<FirebaseUser> _signIn(BuildContext context) async {
-    Scaffold.of(context).showSnackBar(new SnackBar(
-      content: new Text('Sign in'),
-    ));
-
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    AuthResult userDetails =
-        await _firebaseAuth.signInWithCredential(credential);
-    ProviderDetails providerInfo =
-        new ProviderDetails(userDetails.additionalUserInfo.providerId);
-
-    List<ProviderDetails> providerData = new List<ProviderDetails>();
-    providerData.add(providerInfo);
-
-    UserDetails details = new UserDetails(
-      userDetails.additionalUserInfo.providerId,
-      userDetails.user.displayName,
-      userDetails.user.photoUrl,
-      userDetails.user.email,
-      providerData,
-    );
-
-    Firestore.instance
-        .collection("users")
-        .document(userDetails.user.uid)
-        .setData({
-      "username": userDetails.user.displayName,
-      "email": userDetails.user.email,
-      "photoUrl": userDetails.user.photoUrl,
-    }).catchError((onError) => print(onError));
-    setState(() {
-      isAuth = true;
-      authResult = userDetails;
-    });
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MyHomePage(
-                  details: details,
-                )));
-  }
-
+  //Username TextField
   Widget _buildUsername() {
     return TextFormField(
       controller: userNameController,
@@ -146,6 +65,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  //Email TextField
   Widget _buildEmail() {
     return TextFormField(
       controller: emailController,
@@ -174,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  //Password TextField
   Widget _buildPassword() {
     return TextFormField(
       controller: passwordController,
@@ -201,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  //After Login Screen
   Widget buildAuthScreen() {
     return ListView(
       children: <Widget>[
@@ -220,8 +142,10 @@ class _LoginPageState extends State<LoginPage> {
                           borderRadius: BorderRadius.circular(70)),
                       child: CircleAvatar(
                         radius: 35,
-                        backgroundImage:
-                            CachedNetworkImageProvider(widget.details.photoUrl),
+                        backgroundImage: widget.details.photoUrl == null
+                            ? null
+                            : CachedNetworkImageProvider(
+                                widget.details.photoUrl),
                       ),
                     ),
                     SizedBox(width: 10),
@@ -348,35 +272,11 @@ class _LoginPageState extends State<LoginPage> {
             itemCard("Return / Replace", 0, Icons.assignment_return)
           ],
         ),
-        buildListTile("Gift Card", Icons.card_giftcard, Color(0xFFfcd221),
-            Color(0xfffff7d6)),
-        buildListTile(
-            "Favourites", Icons.favorite, Color(0xffFF0000), Color(0xfff5a2a2)),
-        buildListTile(
-            "Coupon", Icons.card_giftcard, Color(0xff2427ff), Color(0xffadafff))
       ],
     );
   }
 
-  ListTile buildListTile(
-      String text, IconData icon, Color color, Color bgColor) {
-    return ListTile(
-      leading: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50), color: bgColor),
-          child: Icon(
-            icon,
-            color: color,
-          )),
-      title: Text(text),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        size: 12,
-      ),
-    );
-  }
-
+  //Login Screen
   Widget login() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -432,9 +332,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: RaisedButton(
                           color: Color(0xffE3E3E3),
                           elevation: 0,
-                          onPressed: () => _signIn(context)
-                              .then((user) => print(user))
-                              .catchError((onError) => print("Error:$onError")),
+                          onPressed: () => _googleLogin(context),
                           child: Stack(
                             children: <Widget>[
                               Text(
@@ -486,6 +384,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  //SignUp Screen
   Widget signUp() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
@@ -551,64 +450,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> signIn() async {
-    final formState = _formKey.currentState;
-    if (formState.validate()) {
-      formState.save();
-      try {
-        AuthResult authresult = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: _email, password: _password);
-        print("Token:${authresult.user.email}");
-        setState(() {
-          isAuth = true;
-          authResult = authresult;
-        });
-      } catch (e) {
-        print(e.message);
-      }
-    }
-  }
-
-  Future<void> createUser() async {
-    final formState = _formKey.currentState;
-    if (formState.validate()) {
-      formState.save();
-      try {
-        FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: _email, password: _password)
-            .then((currentUser) => Firestore.instance
-                    .collection("users")
-                    .document(currentUser.user.uid)
-                    .setData({
-                  "uid": currentUser.user.uid,
-                  "username": userNameController.text,
-                  "email": emailController.text,
-                  "photoUrl": "",
-                }))
-            .then((result) => {
-                  emailController.clear(),
-                  passwordController.clear(),
-                  userNameController.clear(),
-                })
-            .catchError((onError) => print(onError))
-            .catchError((onError) => print(onError));
-
-        setState(() {
-          isNew = false;
-        });
-      } catch (e) {
-        print("Error:$e");
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.details != null
-        ? buildAuthScreen()
-        : isNew ? signUp() : login();
-  }
-
   Widget itemCard(String text, int number, IconData icon) {
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5),
@@ -655,4 +496,182 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ))));
   }
+
+  showAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("LOGOUT",
+              style: TextStyle(
+                color: Theme.of(context).primaryColor,
+              )),
+          content: Text("Are you sure want to logout?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                "YES",
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () {
+                _logout();
+                Navigator.of(context).pop();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyHomePage(
+                              details: widget.details,
+                            )));
+              },
+            ),
+            FlatButton(
+              child: Text("NO", style: TextStyle(color: Colors.black)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //Logout Function
+  _logout() {
+    _googleSignIn.signOut();
+    setState(() {
+      isAuth = true;
+      widget.details = null;
+    });
+  }
+
+  //Logging in
+  Future<void> signIn() async {
+    final formState = _formKey.currentState;
+    if (formState.validate()) {
+      formState.save();
+      try {
+        AuthResult userDetails = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: _email, password: _password);
+        print("Email:${userDetails.user.email}");
+        ProviderDetails providerInfo =
+            new ProviderDetails(userDetails.additionalUserInfo.providerId);
+        List<ProviderDetails> providerData = new List<ProviderDetails>();
+        providerData.add(providerInfo);
+
+        DocumentSnapshot doc = await Firestore.instance
+            .collection('users')
+            .document(userDetails.user.uid)
+            .get();
+
+        UserDetails details = new UserDetails(
+          userDetails.additionalUserInfo.providerId,
+          doc.data['displayName'],
+          doc.data['photoUrl'],
+          userDetails.user.email,
+          providerData,
+        );
+
+        print("Username:" + details.userName);
+
+        setState(() {
+          isAuth = true;
+        });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MyHomePage(
+                      details: details,
+                    )));
+      } catch (e) {
+        print(e.message);
+      }
+    }
+  }
+
+  //Creating User in Firebase
+  Future<void> createUser() async {
+    final formState = _formKey.currentState;
+    if (formState.validate()) {
+      formState.save();
+      try {
+        FirebaseAuth.instance
+            .createUserWithEmailAndPassword(email: _email, password: _password)
+            .then((currentUser) => Firestore.instance
+                    .collection("users")
+                    .document(currentUser.user.uid)
+                    .setData({
+                  "uid": currentUser.user.uid,
+                  "displayName": userNameController.text,
+                  "email": emailController.text,
+                  "photoUrl": "",
+                }))
+            .then((result) => {
+                  emailController.clear(),
+                  passwordController.clear(),
+                  userNameController.clear(),
+                })
+            .catchError((onError) => print(onError))
+            .catchError((onError) => print(onError));
+
+        setState(() {
+          isNew = false;
+        });
+      } catch (e) {
+        print("Error:$e");
+      }
+    }
+  }
+
+  //Google Login
+  Future<void> _googleLogin(BuildContext context) async {
+    Scaffold.of(context).showSnackBar(new SnackBar(
+      content: new Text('Sign in'),
+    ));
+
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    AuthResult userDetails =
+        await _firebaseAuth.signInWithCredential(credential);
+    ProviderDetails providerInfo =
+        new ProviderDetails(userDetails.additionalUserInfo.providerId);
+
+    List<ProviderDetails> providerData = new List<ProviderDetails>();
+    providerData.add(providerInfo);
+
+    UserDetails details = new UserDetails(
+      userDetails.additionalUserInfo.providerId,
+      userDetails.user.displayName,
+      userDetails.user.photoUrl,
+      userDetails.user.email,
+      providerData,
+    );
+
+    Firestore.instance
+        .collection("users")
+        .document(userDetails.user.uid)
+        .setData({
+      "username": userDetails.user.displayName,
+      "email": userDetails.user.email,
+      "photoUrl": userDetails.user.photoUrl,
+    }).catchError((onError) => print(onError));
+    setState(() {
+      isAuth = true;
+      authResult = userDetails;
+    });
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MyHomePage(
+                  details: details,
+                )));
+  }
+
 }

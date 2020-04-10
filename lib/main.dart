@@ -65,7 +65,9 @@ class _MyHomePageState extends State<MyHomePage> {
         details: widget.details,
       ),
       ProductPage(),
-      AddToCartPage(details: widget.details,),
+      AddToCartPage(
+        details: widget.details,
+      ),
       LoginPage(
         details: widget.details,
       )
@@ -76,14 +78,12 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(
             "TOYS",
-            style:
-                TextStyle(color: Colors.white, fontSize: 24),
+            style: TextStyle(color: Colors.white, fontSize: 24),
           ),
           elevation: 0,
-
-  automaticallyImplyLeading: false,
+          automaticallyImplyLeading: false,
           backgroundColor: Theme.of(context).primaryColor,
-           actions: <Widget>[
+          actions: <Widget>[
             GestureDetector(
               child: Icon(
                 Ionicons.ios_search,
@@ -94,9 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             )
           ],
-          
-         ),
-        
+        ),
         body: _children[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           onTap: handleTap,
@@ -155,228 +153,228 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 // leading: widget.details != null
-          //     ? GestureDetector(
-          //         child: Padding(
-          //           padding:
-          //               const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-          //           child: Column(
-          //             mainAxisAlignment: MainAxisAlignment.start,
-          //             crossAxisAlignment: CrossAxisAlignment.start,
-          //             children: <Widget>[
-          //               Container(
-          //                   width: 26,
-          //                   decoration: new BoxDecoration(
-          //                     border: Border(
-          //                       top: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       left: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       right: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       bottom: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                     ),
-          //                   )),
-          //               SizedBox(height: 4),
-          //               Container(
-          //                   alignment: Alignment.topLeft,
-          //                   width: 20,
-          //                   decoration: new BoxDecoration(
-          //                     border: Border(
-          //                       top: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       left: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       right: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       bottom: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                     ),
-          //                   )),
-          //               SizedBox(height: 4),
-          //               Container(
-          //                   width: 26,
-          //                   decoration: new BoxDecoration(
-          //                     border: Border(
-          //                       top: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       left: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       right: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                       bottom: BorderSide(
-          //                           width: 1.2,
-          //                           color: Theme.of(context).primaryColor),
-          //                     ),
-          //                   )),
-          //               SizedBox(height: 4),
-          //             ],
-          //           ),
-          //         ),
-          //         onTap: () {
-          //           _scaffoldKey.currentState.openDrawer();
-          //         },
-          //       )
-          //     : null,
+//     ? GestureDetector(
+//         child: Padding(
+//           padding:
+//               const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.start,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: <Widget>[
+//               Container(
+//                   width: 26,
+//                   decoration: new BoxDecoration(
+//                     border: Border(
+//                       top: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       left: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       right: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       bottom: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                     ),
+//                   )),
+//               SizedBox(height: 4),
+//               Container(
+//                   alignment: Alignment.topLeft,
+//                   width: 20,
+//                   decoration: new BoxDecoration(
+//                     border: Border(
+//                       top: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       left: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       right: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       bottom: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                     ),
+//                   )),
+//               SizedBox(height: 4),
+//               Container(
+//                   width: 26,
+//                   decoration: new BoxDecoration(
+//                     border: Border(
+//                       top: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       left: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       right: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                       bottom: BorderSide(
+//                           width: 1.2,
+//                           color: Theme.of(context).primaryColor),
+//                     ),
+//                   )),
+//               SizedBox(height: 4),
+//             ],
+//           ),
+//         ),
+//         onTap: () {
+//           _scaffoldKey.currentState.openDrawer();
+//         },
+//       )
+//     : null,
 
-          // drawer: widget.details != null
-        //     ? SizedBox(
-        //         width: MediaQuery.of(context).size.width * 0.75,
-        //         child: Drawer(
-        //           child: Column(
-        //             mainAxisAlignment: MainAxisAlignment.start,
-        //             crossAxisAlignment: CrossAxisAlignment.start,
-        //             children: <Widget>[
-        //               UserAccountsDrawerHeader(
-        //                   decoration: BoxDecoration(color: Color(0xffECECEC)),
-        //                   accountName: Text(
-        //                     widget.details.userName,
-        //                     style: TextStyle(
-        //                         color: Theme.of(context).primaryColor,
-        //                         fontWeight: FontWeight.bold),
-        //                   ),
-        //                   accountEmail: Text(
-        //                     widget.details.userEmail,
-        //                     style: TextStyle(
-        //                         color: Theme.of(context).primaryColor,
-        //                         fontWeight: FontWeight.bold),
-        //                   ),
-        //                   currentAccountPicture: CircleAvatar(
-        //                     backgroundImage: CachedNetworkImageProvider(
-        //                         widget.details.photoUrl),
-        //                   )),
-        //               Padding(
-        //                 padding: const EdgeInsets.symmetric(
-        //                     horizontal: 10, vertical: 5),
-        //                 child: Column(
-        //                   crossAxisAlignment: CrossAxisAlignment.start,
-        //                   children: <Widget>[
-        //                     GestureDetector(
-        //                         child: Container(
-        //                       child: Padding(
-        //                         padding: const EdgeInsets.all(8.0),
-        //                         child: Row(
-        //                           children: <Widget>[
-        //                             Icon(
-        //                               FontAwesome.list_alt,
-        //                               size: 18,
-        //                             ),
-        //                             SizedBox(width: 10),
-        //                             Text(
-        //                               "My Orders",
-        //                               style: Theme.of(context).textTheme.title,
-        //                             ),
-        //                           ],
-        //                         ),
-        //                       ),
-        //                     )),
-        //                     Divider(
-        //                       height: 15,
-        //                     ),
-        //                     GestureDetector(
-        //                         child: Container(
-        //                       child: Padding(
-        //                         padding: const EdgeInsets.all(8.0),
-        //                         child: Row(
-        //                           children: <Widget>[
-        //                             Icon(
-        //                               FontAwesome.edit,
-        //                               size: 18,
-        //                             ),
-        //                             SizedBox(width: 10),
-        //                             Text(
-        //                               "Edit Account",
-        //                               style: Theme.of(context).textTheme.title,
-        //                             ),
-        //                           ],
-        //                         ),
-        //                       ),
-        //                     )),
-        //                     Divider(
-        //                       height: 15,
-        //                     ),
-        //                     GestureDetector(
-        //                         child: Container(
-        //                       child: Padding(
-        //                         padding: const EdgeInsets.all(8.0),
-        //                         child: Row(
-        //                           children: <Widget>[
-        //                             Icon(
-        //                               Ionicons.ios_lock,
-        //                               size: 18,
-        //                             ),
-        //                             SizedBox(width: 10),
-        //                             Text(
-        //                               "Change Password",
-        //                               style: Theme.of(context).textTheme.title,
-        //                             ),
-        //                           ],
-        //                         ),
-        //                       ),
-        //                     )),
-        //                     Divider(
-        //                       height: 15,
-        //                     ),
-        //                     GestureDetector(
-        //                         child: Container(
-        //                       child: Padding(
-        //                         padding: const EdgeInsets.all(8.0),
-        //                         child: Row(
-        //                           children: <Widget>[
-        //                             Icon(
-        //                               Ionicons.md_remove_circle,
-        //                               size: 18,
-        //                             ),
-        //                             SizedBox(width: 10),
-        //                             Text(
-        //                               "Delete Account",
-        //                               style: Theme.of(context).textTheme.title,
-        //                             ),
-        //                           ],
-        //                         ),
-        //                       ),
-        //                     )),
-        //                     Divider(
-        //                       height: 15,
-        //                     ),
-        //                     GestureDetector(
-        //                         child: Container(
-        //                       child: Padding(
-        //                         padding: const EdgeInsets.all(8.0),
-        //                         child: Row(
-        //                           children: <Widget>[
-        //                             Icon(
-        //                               FontAwesome.sign_out,
-        //                               size: 18,
-        //                             ),
-        //                             SizedBox(width: 10),
-        //                             Text(
-        //                               "Logout",
-        //                               style: Theme.of(context).textTheme.title,
-        //                             ),
-        //                           ],
-        //                         ),
-        //                       ),
-        //                     )),
-        //                     Divider(
-        //                       height: 15,
-        //                     ),
-        //                   ],
-        //                 ),
-        //               ),
-        //             ],
-        //           ),
-        //         ),
-        //       )
-        //     : null,
+// drawer: widget.details != null
+//     ? SizedBox(
+//         width: MediaQuery.of(context).size.width * 0.75,
+//         child: Drawer(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.start,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: <Widget>[
+//               UserAccountsDrawerHeader(
+//                   decoration: BoxDecoration(color: Color(0xffECECEC)),
+//                   accountName: Text(
+//                     widget.details.userName,
+//                     style: TextStyle(
+//                         color: Theme.of(context).primaryColor,
+//                         fontWeight: FontWeight.bold),
+//                   ),
+//                   accountEmail: Text(
+//                     widget.details.userEmail,
+//                     style: TextStyle(
+//                         color: Theme.of(context).primaryColor,
+//                         fontWeight: FontWeight.bold),
+//                   ),
+//                   currentAccountPicture: CircleAvatar(
+//                     backgroundImage: CachedNetworkImageProvider(
+//                         widget.details.photoUrl),
+//                   )),
+//               Padding(
+//                 padding: const EdgeInsets.symmetric(
+//                     horizontal: 10, vertical: 5),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: <Widget>[
+//                     GestureDetector(
+//                         child: Container(
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Row(
+//                           children: <Widget>[
+//                             Icon(
+//                               FontAwesome.list_alt,
+//                               size: 18,
+//                             ),
+//                             SizedBox(width: 10),
+//                             Text(
+//                               "My Orders",
+//                               style: Theme.of(context).textTheme.title,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     )),
+//                     Divider(
+//                       height: 15,
+//                     ),
+//                     GestureDetector(
+//                         child: Container(
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Row(
+//                           children: <Widget>[
+//                             Icon(
+//                               FontAwesome.edit,
+//                               size: 18,
+//                             ),
+//                             SizedBox(width: 10),
+//                             Text(
+//                               "Edit Account",
+//                               style: Theme.of(context).textTheme.title,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     )),
+//                     Divider(
+//                       height: 15,
+//                     ),
+//                     GestureDetector(
+//                         child: Container(
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Row(
+//                           children: <Widget>[
+//                             Icon(
+//                               Ionicons.ios_lock,
+//                               size: 18,
+//                             ),
+//                             SizedBox(width: 10),
+//                             Text(
+//                               "Change Password",
+//                               style: Theme.of(context).textTheme.title,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     )),
+//                     Divider(
+//                       height: 15,
+//                     ),
+//                     GestureDetector(
+//                         child: Container(
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Row(
+//                           children: <Widget>[
+//                             Icon(
+//                               Ionicons.md_remove_circle,
+//                               size: 18,
+//                             ),
+//                             SizedBox(width: 10),
+//                             Text(
+//                               "Delete Account",
+//                               style: Theme.of(context).textTheme.title,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     )),
+//                     Divider(
+//                       height: 15,
+//                     ),
+//                     GestureDetector(
+//                         child: Container(
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Row(
+//                           children: <Widget>[
+//                             Icon(
+//                               FontAwesome.sign_out,
+//                               size: 18,
+//                             ),
+//                             SizedBox(width: 10),
+//                             Text(
+//                               "Logout",
+//                               style: Theme.of(context).textTheme.title,
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     )),
+//                     Divider(
+//                       height: 15,
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       )
+//     : null,
