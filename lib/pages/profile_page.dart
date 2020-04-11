@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toys_shop/models/wishlist.dart';
@@ -16,6 +17,12 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   Custom custom = Custom();
+  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  FirebaseUser _user;
+  getProfileData() async {
+    _user = await _firebaseAuth.currentUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(

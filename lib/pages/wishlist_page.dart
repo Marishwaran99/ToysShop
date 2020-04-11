@@ -69,7 +69,9 @@ class _WishlistPageState extends State<WishlistPage> {
       updateWishlist();
     }
     return Scaffold(
-        appBar: MyAppBar(),
+        appBar: MyAppBar(
+          back: true,
+        ),
         body: SingleChildScrollView(
             child: Container(
                 child: Column(
@@ -78,7 +80,10 @@ class _WishlistPageState extends State<WishlistPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                SectionTitle('Wishlist'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: SectionTitle('Wishlist'),
+                ),
                 Padding(
                   padding: const EdgeInsets.only(right: 16.0),
                   child: FlatButton(

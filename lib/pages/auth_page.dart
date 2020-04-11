@@ -5,27 +5,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:toys_shop/main.dart';
 import 'package:toys_shop/models/user_details.dart';
 import 'package:toys_shop/styles/custom.dart';
-import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
 import 'package:toys_shop/widgets/section_spacing.dart';
-
-import 'home_page.dart';
 
 final DateTime timestamp = DateTime.now();
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
 final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-class LoginPage extends StatefulWidget {
-  UserDetails details;
-  LoginPage({Key key, this.details}) : super(key: key);
+class AuthPage extends StatefulWidget {
+  final UserDetails details;
+  AuthPage({Key key, this.details}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _AuthPageState createState() => _AuthPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _AuthPageState extends State<AuthPage> {
   AuthResult authResult;
   bool isNew = false;
   bool isAuth = false;
@@ -38,49 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  _logout() {
-    _googleSignIn.signOut();
-    setState(() {
-      isAuth = true;
-      widget.details = null;
-    });
-  }
-
-  showAlert(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("LOGOUT",
-              style: TextStyle(
-                color: Theme.of(context).primaryColor,
-              )),
-          content: Text("Are you sure want to logout?"),
-          actions: <Widget>[
-            FlatButton(
-              child: Text(
-                "YES",
-                style: TextStyle(color: Colors.black),
-              ),
-              onPressed: () {
-                _logout();
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text("NO", style: TextStyle(color: Colors.black)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<FirebaseUser> _signIn(BuildContext context) async {
+  Future<FirebaseUser> _signInUsingGoogle(BuildContext context) async {
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
@@ -118,24 +74,37 @@ class _LoginPageState extends State<LoginPage> {
       isAuth = true;
       authResult = userDetails;
     });
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => HomePage()));
+    navigateToMainPage();
   }
 
   Widget _buildUsername() {
-    return TextFormField(
-      controller: userNameController,
-      decoration: InputDecoration(),
-      validator: (String value) {
-        if (value.isEmpty) {
-          return 'Username is Required';
-        }
-        return null;
-      },
-      onSaved: (String value) {
-        _username = value;
-      },
-    );
+    return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            'Username',
+            style: Custom().inputLabelTextStyle,
+          ),
+          SizedBox(height: 4),
+          Container(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(4)),
+              child: TextFormField(
+                controller: userNameController,
+                decoration: InputDecoration(border: InputBorder.none),
+                validator: (String value) {
+                  if (value.isEmpty) {
+                    return 'Username is Required';
+                  }
+                  return null;
+                },
+                onSaved: (String value) {
+                  _username = value;
+                },
+              ))
+        ]);
   }
 
   Widget _buildEmail() {
@@ -152,6 +121,7 @@ class _LoginPageState extends State<LoginPage> {
           decoration: BoxDecoration(
               color: Colors.grey[100], borderRadius: BorderRadius.circular(4)),
           child: TextFormField(
+            autofocus: true,
             controller: emailController,
             decoration: InputDecoration(
                 hintText: 'you@gmail.com', border: InputBorder.none),
@@ -215,28 +185,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  ListTile buildListTile(
-      String text, IconData icon, Color color, Color bgColor) {
-    return ListTile(
-      leading: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50), color: bgColor),
-          child: Icon(
-            icon,
-            color: color,
-          )),
-      title: Text(text),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        size: 12,
-      ),
-    );
-  }
-
-  Widget login() {
+  Widget loginPage() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,7 +237,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: MediaQuery.of(context).size.width,
                       child: FlatButton(
                           color: Colors.grey[200],
-                          onPressed: () => _signIn(context)
+                          onPressed: () => _signInUsingGoogle(context)
                               .then((user) => print(user))
                               .catchError((onError) => print("Error:$onError")),
                           child: Row(
@@ -324,63 +275,83 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget signUp() {
+  Widget signUpPage() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  "SIGN UP",
-                  style: Theme.of(context).textTheme.headline,
-                )),
-            SizedBox(height: 20),
+            Text(
+              "Sign up",
+              style: Custom().headlineTextStyle,
+            ),
+            SectionSpacing(),
             Form(
                 key: _formKey,
                 child: Column(
                   children: <Widget>[
                     _buildUsername(),
+                    InSectionSpacing(),
                     _buildEmail(),
+                    InSectionSpacing(),
                     _buildPassword(),
-                    SizedBox(height: 20),
-                    RaisedButton(
-                      color: Theme.of(context).primaryColor,
-                      textColor: Colors.white,
-                      onPressed: createUser,
-                      child: Text(
-                        "SIGN UP",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                    SectionSpacing(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        FlatButton(
+                          color: Colors.black87,
+                          textColor: Colors.white,
+                          onPressed: createUser,
+                          child: Text(
+                            "Sign up",
+                            style: Custom().buttonTextStyle,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 5),
+                    InSectionSpacing(),
+                    Text(
+                      "OR",
+                      style: Custom().bodyTextStyle,
+                    ),
+                    InSectionSpacing(),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: FlatButton(
+                          color: Colors.grey[200],
+                          onPressed: () => _signInUsingGoogle(context)
+                              .then((user) => print(user))
+                              .catchError((onError) => print("Error:$onError")),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text("Sign up using Google",
+                                  style: Custom().buttonTextStyle),
+                            ],
+                          )),
+                    )
                   ],
                 )),
-            SizedBox(height: 15),
+            InSectionSpacing(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
                   "Already have an account ? ",
-                  style: TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16),
+                  style: Custom().bodyTextStyle,
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: 8),
                 GestureDetector(
                     onTap: () {
                       setState(() {
-                        isNew = false;
+                        isNew = true;
                       });
                     },
-                    child: Text("LOGIN",
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16)))
+                    child: Text("Login", style: Custom().buttonTextStyle))
               ],
             )
           ],
@@ -397,14 +368,17 @@ class _LoginPageState extends State<LoginPage> {
         AuthResult authresult = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _password);
         print("Token:${authresult.user.email}");
-        setState(() {
-          isAuth = true;
-          authResult = authresult;
-        });
+        navigateToMainPage();
       } catch (e) {
         print(e.message);
       }
     }
+  }
+
+  navigateToMainPage() {
+    Navigator.push(context, MaterialPageRoute(builder: (BuildContext ctx) {
+      return MainPage();
+    }));
   }
 
   Future<void> createUser() async {
@@ -423,17 +397,14 @@ class _LoginPageState extends State<LoginPage> {
                   "email": emailController.text,
                   "photoUrl": "",
                 }))
-            .then((result) => {
-                  emailController.clear(),
-                  passwordController.clear(),
-                  userNameController.clear(),
-                })
+            .then((result) {
+              emailController.clear();
+              passwordController.clear();
+              userNameController.clear();
+              navigateToMainPage();
+            })
             .catchError((onError) => print(onError))
             .catchError((onError) => print(onError));
-
-        setState(() {
-          isNew = false;
-        });
       } catch (e) {
         print("Error:$e");
       }
@@ -442,6 +413,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isNew ? signUp() : login();
+    return isNew ? signUpPage() : loginPage();
   }
 }

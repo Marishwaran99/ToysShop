@@ -1,9 +1,10 @@
 import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toys_shop/pages/home_page.dart';
-import 'package:toys_shop/pages/login_page.dart';
+import 'package:toys_shop/pages/auth_page.dart';
 import 'package:toys_shop/pages/product_page.dart';
 import 'package:toys_shop/pages/profile_page.dart';
 import 'package:toys_shop/pages/wishlist_page.dart';
@@ -19,13 +20,14 @@ import 'package:toys_shop/widgets/section_spacing.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Toys Shop',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Josefin'),
-      home: MainPage(),
+      home: _firebaseAuth.currentUser() != null ? MainPage() : AuthPage(),
     );
   }
 }
@@ -61,6 +63,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         key: _scaffoldKey,
         appBar: MyAppBar(
@@ -69,7 +72,7 @@ class _MainPageState extends State<MainPage> {
             _scaffoldKey.currentState.openDrawer();
           },
         ),
-        body: LoginPage(),
+        body: _screens[_index],
         bottomNavigationBar: AnimatedBottomBar(
             barItems: _bottomBarItem,
             duration: Duration(milliseconds: 200),

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "308119172516",
+    "firebase_url": "https://toys-a5405.firebaseio.com",
+    "project_id": "toys-a5405",
+    "storage_bucket": "toys-a5405.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:308119172516:android:0461aa4c3f2bd8ba54bd31",
+        "android_client_info": {
+          "package_name": "com.example.toys_shop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "308119172516-fipt3s84aimi6p7e21sfkns4pgm5h6ni.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCakD3QYZtTI-3Ft6YHbfJqxaetyEBrnK8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "308119172516-fipt3s84aimi6p7e21sfkns4pgm5h6ni.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
