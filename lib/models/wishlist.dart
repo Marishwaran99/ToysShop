@@ -1,12 +1,12 @@
 
 class Wishlist{
   int id;
-  int productId;
+  String productId;
   Wishlist({this.productId});
   Wishlist.withId(id, productId);
 
 
-  set productID(int id){
+  set productID(String id){
     this.productId = id;
   }
 

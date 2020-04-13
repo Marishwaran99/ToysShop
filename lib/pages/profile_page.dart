@@ -1,109 +1,145 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:toys_shop/models/user.dart';
 import 'package:toys_shop/models/wishlist.dart';
+import 'package:toys_shop/pages/edit_profile_page.dart';
 import 'package:toys_shop/pages/wishlist_page.dart';
+import 'package:toys_shop/services/auth.dart';
+import 'package:toys_shop/services/datastore.dart';
 import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
 import 'package:toys_shop/widgets/section_spacing.dart';
 
 class ProfilePage extends StatefulWidget {
+  final Auth auth;
+  final Datastore datastore;
+  final VoidCallback logoutCallback;
+  ProfilePage({this.auth, this.datastore, this.logoutCallback});
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
   Custom custom = Custom();
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  FirebaseUser _user;
+  Map<String, dynamic> userData;
+  String uid;
+  @override
+  void initState() {
+    super.initState();
+    getProfileData();
+  }
+
   getProfileData() async {
-    _user = await _firebaseAuth.currentUser();
+    FirebaseUser user = await widget.auth.getCurrentUser();
+    log(user.email);
+    if (user != null) userData = await widget.datastore.getUserData(user.uid);
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
         child: Container(
-      child: Column(children: [
-        Container(
-          padding: EdgeInsets.all(16),
-          width: MediaQuery.of(context).size.width,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            InSectionSpacing(),
-            Row(
-              children: <Widget>[
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(64),
-                      //border: Border.all(color: Colors.black, width: 4),
-                      color: Colors.grey[100],
-                      image: DecorationImage(
-                          image: NetworkImage(
-                              'https://avatars3.githubusercontent.com/u/32413975?s=60&u=eab187517e8727d301ee754d174019deec8ff06f&v=4'))),
-                ),
-                SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Marishwaran',
-                      style: custom.cardTitleTextStyle,
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'marishwaran22@gmail.com',
-                      style: custom.bodyTextStyle,
-                    )
-                  ],
-                )
-              ],
-            ),
-            SectionSpacing(),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                ActionCard(Icons.list, "Orders", () {}),
-                ActionCard(Icons.edit, "Edit", () {}),
-                ActionCard(CupertinoIcons.heart_solid, "Wishlist", () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (BuildContext ctx) {
-                    return WishlistPage();
-                  }));
-                }),
-                ActionCard(Icons.exit_to_app, "Logout", () {}),
-              ],
-            ),
-            SectionSpacing(),
-            SectionTitle('Shopping Information'),
-            InSectionSpacing(),
-            Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  ActionCardWithValue(
-                      Icons.credit_card, "Pending Payment", 5, () {}),
-                  ActionCardWithValue(Icons.warning, "To be shipped", 5, () {}),
-                ]),
-            InSectionSpacing(),
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ActionCardWithValue(
-                    Icons.airport_shuttle, "To be Delivered", 5, () {}),
-                ActionCardWithValue(Icons.replay, "Replace/Return", 0, () {}),
-              ],
-            ),
-          ]),
-        )
-      ]),
+      child: userData != null
+          ? Column(children: [
+              Container(
+                padding: EdgeInsets.all(16),
+                width: MediaQuery.of(context).size.width,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      InSectionSpacing(),
+                      Row(
+                        children: <Widget>[
+                          Container(
+                              width: 64,
+                              height: 64,
+                              child: Center(
+                                  child: Text(
+                                userData["name"].toString().substring(0, 1),
+                                style: Custom().titleTextStyle,
+                              )),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(64),
+                                //border: Border.all(color: Colors.black, width: 4),
+                                color: Colors.grey[100],
+                              )),
+                          SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                userData["name"],
+                                style: custom.cardTitleTextStyle,
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                userData["email"],
+                                style: custom.bodyTextStyle,
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                      SectionSpacing(),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          ActionCard(Icons.list, "Orders", () {}),
+                          ActionCard(Icons.edit, "Edit", () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (BuildContext ctx) {
+                              return EditProfilePage(
+                                  auth: widget.auth,
+                                  datastore: widget.datastore);
+                            }));
+                          }),
+                          ActionCard(CupertinoIcons.heart_solid, "Wishlist",
+                              () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (BuildContext ctx) {
+                              return WishlistPage();
+                            }));
+                          }),
+                          ActionCard(Icons.exit_to_app, "Logout", () {
+                            widget.auth.signOut();
+                            widget.logoutCallback();
+                          }),
+                        ],
+                      ),
+                      SectionSpacing(),
+                      SectionTitle('Shopping Information'),
+                      InSectionSpacing(),
+                      Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            ActionCardWithValue(
+                                Icons.credit_card, "Pending Payment", 5, () {}),
+                            ActionCardWithValue(
+                                Icons.warning, "To be shipped", 5, () {}),
+                          ]),
+                      InSectionSpacing(),
+                      Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ActionCardWithValue(Icons.airport_shuttle,
+                              "To be Delivered", 5, () {}),
+                          ActionCardWithValue(
+                              Icons.replay, "Replace/Return", 0, () {}),
+                        ],
+                      ),
+                    ]),
+              )
+            ])
+          : Center(child: CircularProgressIndicator()),
     ));
   }
 }

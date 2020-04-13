@@ -15,15 +15,8 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
         elevation: 0,
-        backgroundColor: custom.appBarColor,
-        automaticallyImplyLeading: false,
         title: Row(
           children: <Widget>[
-            IconButton(
-                icon: Icon(Icons.chevron_left),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
             Text(
               'Toys',
               style: custom.appbarTitleTextStyle,

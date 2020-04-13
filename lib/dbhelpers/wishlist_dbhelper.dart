@@ -37,7 +37,7 @@ class WishlistDBHelper {
 
   void _createDb(Database db, int newVersion) async {
     var sql =
-        'CREATE TABLE $wishTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colProductId INTEGER)';
+        'CREATE TABLE $wishTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colProductId TEXT)';
     await db.execute(sql);
   }
 
