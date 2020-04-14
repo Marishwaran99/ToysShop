@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
 import 'package:toys/models/userModel.dart';
@@ -173,6 +174,7 @@ class _ProductPageState extends State<ProductPage> {
 }
 
 class BuildProductCard extends StatelessWidget {
+  bool fav = false;
   ProductList p;
   User currentUser;
   BuildProductCard({Key key, @required this.custom, this.p, this.currentUser})
@@ -297,10 +299,22 @@ class BuildProductCard extends StatelessWidget {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.only(top: 5),
-                        child: Text(
-                          '${p.title}',
-                          overflow: TextOverflow.fade,
-                          style: Theme.of(context).textTheme.headline,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text(
+                              '${p.title}',
+                              overflow: TextOverflow.fade,
+                              style: Theme.of(context).textTheme.headline,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: IconButton(icon: fav ? Icon(FontAwesome.heart, size: 15,color: Colors.red,) : Icon(FontAwesome.heart_o, size: 15,color: Colors.red,), onPressed: (){
+                                fav = !fav;
+                                print(fav);
+                              }),
+                            )
+                          ],
                         ),
                       ),
                       Text(
