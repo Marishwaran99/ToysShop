@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:toys/main.dart';
-import 'package:toys/models/userDetails.dart';
 import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/admin/admin_page.dart';
 import 'package:toys/pages/edit_page.dart';
@@ -20,7 +19,7 @@ final GoogleSignIn _googleSignIn = new GoogleSignIn();
 final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
 class LoginPage extends StatefulWidget {
-  UserDetails details;
+  User details;
   LoginPage({Key key, this.details}) : super(key: key);
 
   @override
@@ -576,26 +575,25 @@ class _LoginPageState extends State<LoginPage> {
         AuthResult userDetails = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _password);
         print("Email:${userDetails.user.email}");
-        ProviderDetails providerInfo =
-            new ProviderDetails(userDetails.additionalUserInfo.providerId);
-        List<ProviderDetails> providerData = new List<ProviderDetails>();
-        providerData.add(providerInfo);
-
+        
         DocumentSnapshot doc = await Firestore.instance
             .collection('users')
             .document(userDetails.user.uid)
             .get();
 
-        UserDetails details = new UserDetails(
-          userDetails.additionalUserInfo.providerId,
+        User details = new User(
+          doc.data['uid'],
           doc.data['displayName'],
+          doc.data['email'],
+          doc.data['address'],
+          doc.data['city'],
+          doc.data['state'],
           doc.data['photoUrl'],
-          userDetails.user.uid,
-          userDetails.user.email,
-          providerData,
+          doc.data['loginType'],
+          doc.data['role'],
         );
 
-        print("Username:" + details.userName);
+        print("Username:" + details.username);
 
         setState(() {
           isAuth = true;
@@ -696,25 +694,23 @@ class _LoginPageState extends State<LoginPage> {
 
     AuthResult userDetails =
         await _firebaseAuth.signInWithCredential(credential);
-    ProviderDetails providerInfo =
-        new ProviderDetails(userDetails.additionalUserInfo.providerId);
-    List<ProviderDetails> providerData = new List<ProviderDetails>();
-    providerData.add(providerInfo);
-
-    UserDetails details = new UserDetails(
-      userDetails.additionalUserInfo.providerId,
-      userDetails.user.displayName,
-      userDetails.user.photoUrl,
-      userDetails.user.uid,
-      userDetails.user.email,
-      providerData,
-    );
-    print("photo: ${details.photoUrl}");
 
     DocumentSnapshot doc = await Firestore.instance
         .collection("users")
         .document(userDetails.user.uid)
         .get();
+
+      User details = new User(
+          doc.data['uid'],
+          doc.data['displayName'],
+          doc.data['email'],
+          doc.data['address'],
+          doc.data['city'],
+          doc.data['state'],
+          doc.data['photoUrl'],
+          doc.data['loginType'],
+          doc.data['role'],
+        );
 
     if (!doc.exists) {
       Firestore.instance

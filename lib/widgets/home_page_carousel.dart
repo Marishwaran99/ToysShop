@@ -131,7 +131,7 @@ class ProductCard extends StatelessWidget {
       onTap: () {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext ctx) {
-          return ProductPageDetailPage(product, "user");
+          return ProductPageDetailPage(product.id, "user");
         }));
       },
       child: Stack(

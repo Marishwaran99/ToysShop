@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:toys/models/userDetails.dart';
 import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/view_image.dart';
 import 'package:toys/widgets/appbar.dart';
@@ -17,7 +16,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 
 class EditPage extends StatefulWidget {
-  UserDetails details;
+  User details;
   EditPage({this.details});
 
   @override

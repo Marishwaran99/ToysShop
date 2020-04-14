@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:toys/models/userDetails.dart';
+import 'package:toys/models/userModel.dart';
 import 'package:toys/widgets/SectionTitle.dart';
 import 'package:toys/widgets/home_page_carousel.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
@@ -7,7 +7,7 @@ import 'package:toys/widgets/product_carousel.dart';
 import 'package:toys/widgets/section_spacing.dart';
 
 class HomePage extends StatefulWidget {
-  UserDetails details;
+  User details;
   HomePage({this.details});
   @override
   _HomePageState createState() => _HomePageState();

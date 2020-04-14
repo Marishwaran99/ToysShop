@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
-import 'package:toys/models/userDetails.dart';
+import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/add_to_cart_page.dart';
 import 'package:toys/pages/home_page.dart';
 import 'package:toys/pages/product_page.dart';
@@ -38,7 +39,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  UserDetails details;
+  User details;
   MyHomePage({Key key, this.title, this.details}) : super(key: key);
 
   final String title;
@@ -49,7 +50,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String _cartCount = '0';
   int _currentIndex = 0;
+  getCartCount() async {
+    QuerySnapshot doc = await Firestore.instance
+        .collection('carts')
+        .where('userId', isEqualTo: widget.details.uid)
+        .getDocuments();
+    setState(() {
+      _cartCount = doc.documents.length.toString();
+    });
+  }
 
   void handleTap(int index) {
     setState(() {
@@ -58,14 +69,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCartCount();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       HomePage(
         details: widget.details,
       ),
-      ProductPage(),
+      ProductPage(
+        currentUser: widget.details,
+      ),
       AddToCartPage(
-        details: widget.details,
+        currentUser: widget.details,
       ),
       LoginPage(
         details: widget.details,
@@ -77,7 +97,10 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: AppBar(
           title: Text(
             "TOYS",
-            style: TextStyle(color: Theme.of(context).primaryColor, letterSpacing: 2, fontSize: 24),
+            style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                letterSpacing: 2,
+                fontSize: 24),
           ),
           elevation: 0,
           automaticallyImplyLeading: false,
@@ -89,6 +112,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Theme.of(context).primaryColor,
               ),
               onTap: () {
+                print(widget.details.uid);
+                getCartCount();
                 print('search');
               },
             )
@@ -102,8 +127,40 @@ class _MyHomePageState extends State<MyHomePage> {
                 context, _currentIndex, 0, Icons.home, "Home"),
             buildBottomNavigationBarItem(
                 context, _currentIndex, 1, FontAwesome.list, "Products"),
-            buildBottomNavigationBarItem(
-                context, _currentIndex, 2, FontAwesome.cart_arrow_down, "Cart"),
+            BottomNavigationBarItem(
+              icon: Stack(
+                children: <Widget>[
+                  Icon(
+                    FontAwesome.cart_arrow_down,
+                    color: _currentIndex == 2
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54,
+                  ),
+                  _cartCount == '0' ? Text('') : Padding(
+                    padding: const EdgeInsets.only(left: 17),
+                    child: Container(
+                      width: 15,
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Text(
+                        _cartCount,
+                        style: TextStyle(fontSize: 10, color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              title: new Text("Cart",
+                  style: TextStyle(
+                    color: _currentIndex == 2
+                        ? Theme.of(context).primaryColor
+                        : Colors.black54,
+                  )),
+            ),
             buildBottomNavigationBarItem(
                 context, _currentIndex, 3, Ionicons.ios_person, "Profile"),
           ],
@@ -116,16 +173,6 @@ class _MyHomePageState extends State<MyHomePage> {
       icon: text == "Cart"
           ? Stack(
               children: <Widget>[
-                // Padding(
-                //   padding: const EdgeInsets.only(left:15.0),
-                //   child: Container(
-                //     color:Colors.black,
-                //     child: Padding(
-                //       padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2),
-                //       child: Text(count.toString(), style: TextStyle(fontSize: 10, color: Colors.white),),
-                //     ),
-                //   ),
-                // ),
                 Icon(
                   icon,
                   color: _currentIndex == number

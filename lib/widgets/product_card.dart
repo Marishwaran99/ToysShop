@@ -77,11 +77,22 @@ class _ProductCardState extends State<ProductCard> {
 
   Future<void> deleteProductImage(DocumentSnapshot doc) {
     print(doc.data['previewImages']);
-    if (doc.data['previewImages'] != null ) {
+    if (doc.data['previewImages'] != null) {
       for (var img in doc.data['previewImages']) {
         var fileUrl = Uri.decodeFull(basename(img))
             .replaceAll(new RegExp(r'(\?alt).*'), '');
-        FirebaseStorage.instance.ref().child(fileUrl).delete().then((value) {}).catchError((onError){print(onError.message);});
+        try {
+          FirebaseStorage.instance
+              .ref()
+              .child(fileUrl)
+              .delete()
+              .then((value) {})
+              .catchError((onError) {
+            print(onError.message);
+          });
+        }catch (e) {
+          print('error caught: $e');
+        }
       }
     }
     var fileUrl = Uri.decodeFull(basename(doc.data['thumbnailImage']))
@@ -107,8 +118,7 @@ class _ProductCardState extends State<ProductCard> {
       onTap: () {
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (BuildContext ctx) {
-          return ProductPageDetailPage(widget.product, 'admin');
-
+          return ProductPageDetailPage(widget.product.id, 'admin');
         }));
       },
       child: isLoading

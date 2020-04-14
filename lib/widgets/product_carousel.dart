@@ -109,10 +109,10 @@ class _ProductCardState extends State<ProductCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (BuildContext ctx) {
-          return ProductPageDetailPage(_product, "user");
-        }));
+        // Navigator.of(context)
+        //     .push(MaterialPageRoute(builder: (BuildContext ctx) {
+        //   return ProductPageDetailPage(, "user");
+        // }));
       },
       child: Container(
           width: MediaQuery.of(context).size.width * 0.6,
