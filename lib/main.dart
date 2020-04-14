@@ -68,11 +68,24 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  setCurrentIndex() {
+    if (widget.details == null) {
+      setState(() {
+        _currentIndex = 3;
+      });
+    } else {
+      setState(() {
+        _currentIndex = 0;
+      });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getCartCount();
+    setCurrentIndex();
   }
 
   @override
@@ -136,22 +149,26 @@ class _MyHomePageState extends State<MyHomePage> {
                         ? Theme.of(context).primaryColor
                         : Colors.black54,
                   ),
-                  _cartCount == '0' ? Text('') : Padding(
-                    padding: const EdgeInsets.only(left: 17),
-                    child: Container(
-                      width: 15,
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: Text(
-                        _cartCount,
-                        style: TextStyle(fontSize: 10, color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
+                  _cartCount == '0'
+                      ? Text('')
+                      : Padding(
+                          padding: const EdgeInsets.only(left: 17),
+                          child: Container(
+                            width: 15,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Text(
+                              _cartCount,
+                              style:
+                                  TextStyle(fontSize: 10, color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                 ],
               ),
               title: new Text("Cart",

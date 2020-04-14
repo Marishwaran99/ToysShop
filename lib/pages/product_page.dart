@@ -200,6 +200,7 @@ class BuildProductCard extends StatelessWidget {
             .collection('carts')
             .document(id.toString())
             .setData({
+          "cartId": id,
           "productId": p.id,
           "quantity": 1,
           "productName": p.title,
@@ -222,7 +223,12 @@ class BuildProductCard extends StatelessWidget {
                 FlatButton(
                   child: Text("Ok", style: TextStyle(color: Colors.black)),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: currentUser,)));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                                  details: currentUser,
+                                )));
                   },
                 ),
               ],
@@ -247,13 +253,38 @@ class BuildProductCard extends StatelessWidget {
           color: Color(0xffECECEC),
           child: Row(
             children: <Widget>[
-              Container(
-                width: MediaQuery.of(context).size.width * 0.4,
-                height: 150,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: CachedNetworkImageProvider(p.thumbnailImage))),
+              Stack(
+                children: <Widget>[
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: 150,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image:
+                                CachedNetworkImageProvider(p.thumbnailImage))),
+                  ),
+                  p.discount > 0
+                      ? Align(
+                          alignment: Alignment.topLeft,
+                          child: Container(
+                              width: 20,
+                              height: 20,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  color: Colors.red[100],
+                                  borderRadius: BorderRadius.circular(32)),
+                              child: Center(
+                                child: Text(
+                                  p.discount.toString() + "%",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )))
+                      : Container()
+                ],
               ),
               SizedBox(
                 width: 10,
@@ -278,8 +309,20 @@ class BuildProductCard extends StatelessWidget {
                         style: TextStyle(color: Colors.grey),
                       ),
                       InSectionSpacing(),
-                      Text('₹ ' + p.price.toString(),
-                          style: custom.cardTitleTextStyle),
+                      Column(
+                        children: <Widget>[
+                          Text(
+                              '₹ ' +
+                                  (p.price - (p.price * p.discount / 100))
+                                      .toString(),
+                              style: custom.cardTitleTextStyle),
+                          p.discount > 0
+                      ? Text('₹ ' + p.price.toString(),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.lineThrough)) : Text(""),
+                        ],
+                      ),
                       buildRaisedButton("Add to Cart", Colors.white,
                           Theme.of(context).primaryColor, () {
                         handleCart(p, context);

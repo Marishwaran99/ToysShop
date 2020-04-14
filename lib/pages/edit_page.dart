@@ -52,11 +52,11 @@ class _EditPageState extends State<EditPage> {
         doc.data['photoUrl'],
         doc.data['logintype'],
         doc.data['role']);
-    print(details.username);
+    // print(details.username);
     setState(() {
       currentUser = details;
     });
-    print(currentUser.loginType);
+    // print(currentUser.loginType);
     setState(() {
       _loading = false;
     });
