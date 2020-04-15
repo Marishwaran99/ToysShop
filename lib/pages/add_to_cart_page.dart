@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
 import 'package:toys/models/userModel.dart';
@@ -54,6 +55,7 @@ class CartProductList {
 class _AddToCartPageState extends State<AddToCartPage> {
   List<CartProductList> _cartList = List<CartProductList>();
   int _CartCount;
+  int _total = 0;
 
   getCartProducts() async {
     QuerySnapshot docs = await Firestore.instance
@@ -66,10 +68,13 @@ class _AddToCartPageState extends State<AddToCartPage> {
     });
     List<CartProductList> CartList =
         docs.documents.map((val) => CartProductList.fromDocument(val)).toList();
-    print(CartList.length);
     setState(() {
       _cartList = CartList;
     });
+    for (var cart in CartList) {
+      _total =
+          _total + (cart.price - (cart.price * cart.discount / 100)).toInt();
+    }
   }
 
   @override
@@ -96,11 +101,16 @@ class _AddToCartPageState extends State<AddToCartPage> {
             ? Stack(
                 children: <Widget>[
                   SingleChildScrollView(
-                      child: Container(
+                      child: Column(
+                    children: <Widget>[
+                      Container(
                           child: Column(
                               children: _cartList.map((p) {
-                    return CartProduct(p, widget.currentUser);
-                  }).toList()))),
+                        return CartProduct(p, widget.currentUser);
+                      }).toList())),
+                      SizedBox(height: 50)
+                    ],
+                  )),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Padding(
@@ -108,11 +118,27 @@ class _AddToCartPageState extends State<AddToCartPage> {
                       child: FloatingActionButton(
                           backgroundColor: Theme.of(context).primaryColor,
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => BuyPage(currentUser: widget.currentUser,)));
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => BuyPage(
+                                          currentUser: widget.currentUser,
+                                        )));
                           },
                           child: Icon(Icons.navigate_next)),
                     ),
                   ),
+                  // Align(
+                  //   alignment: Alignment.bottomLeft,
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(18.0),
+                  //     child: FloatingActionButton.extended(
+                  //       backgroundColor: Theme.of(context).primaryColor,
+                  //       label: Text("Total: " + _total.toString()),
+                  //       onPressed: (){print("Total");},
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               )
             : Center(
@@ -161,7 +187,7 @@ class _CartProductState extends State<CartProduct> {
       }
     });
     buildSuccessDialog("Product Deleted From Cart!", context);
-    
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => AddToCartPage(currentUser: widget.currentUser,)));
   }
 
   int _counter;
@@ -234,6 +260,7 @@ class _CartProductState extends State<CartProduct> {
   void initState() {
     super.initState();
     getCartQuantity();
+    print(widget.currentUser.username);
   }
 
   @override
@@ -283,10 +310,11 @@ class _CartProductState extends State<CartProduct> {
                                   .toString(),
                           style: custom.cardTitleTextStyle),
                       widget.cartProduct.discount > 0
-                      ? Text('₹ ' + widget.cartProduct.price.toString(),
-                          style: TextStyle(
-                              fontSize: 14,
-                              decoration: TextDecoration.lineThrough)):Text(""),
+                          ? Text('₹ ' + widget.cartProduct.price.toString(),
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.lineThrough))
+                          : Text(""),
                     ],
                   ),
                   InSectionSpacing(),

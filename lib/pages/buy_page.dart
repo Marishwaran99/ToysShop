@@ -4,6 +4,7 @@ import 'package:toys/models/product.dart';
 import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/add_to_cart_page.dart';
 import 'package:toys/pages/product_detail_page.dart';
+import 'package:toys/pages/user_order_page.dart';
 import 'package:toys/styles/custom.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
@@ -18,6 +19,9 @@ class BuyPage extends StatefulWidget {
 }
 
 class _BuyPageState extends State<BuyPage> {
+  int _subTotal = 0;
+  int _shipping = 0;
+  int _tax = 0, _total = 0;
   List<CartProductList> _cartProductList = List<CartProductList>();
   getCartProduct() async {
     QuerySnapshot snapshots = await Firestore.instance
@@ -30,6 +34,17 @@ class _BuyPageState extends State<BuyPage> {
     print(cartProductList.map((f) => print(f.cartId)));
     setState(() {
       _cartProductList = cartProductList;
+    });
+    for (var cart in cartProductList) {
+      _subTotal =
+          _subTotal + (cart.price - (cart.price * cart.discount / 100)).toInt();
+    }
+    if (_subTotal < 500) {
+      _shipping = 50;
+    }
+    setState(() {
+      _tax = ((_subTotal + _shipping) * (6 / 100)).toInt();
+      _total = _subTotal + _shipping + _tax;
     });
   }
 
@@ -76,6 +91,68 @@ class _BuyPageState extends State<BuyPage> {
         TextEditingController(text: _currentUser.city);
     TextEditingController stateController =
         TextEditingController(text: _currentUser.state);
+
+    handlePlaceOrder() async {
+      // print(addressController.text);
+      // print(userNameController.text);
+      // print(cityController.text);
+      // print(stateController.text);
+      // print(radioItem);
+      List ProductIds = List();
+      List ProductQuantity = List();
+      print(ProductIds);
+      if (addressController.text != null &&
+          userNameController.text != null &&
+          cityController.text != null &&
+          stateController.text != null &&
+          radioItem != '') {
+        for (var product in _cartProductList) {
+          ProductIds.add(product.productId);
+          ProductQuantity.add(product.quantity);
+          
+        }
+        int id = DateTime.now().millisecondsSinceEpoch;
+        // print(id);
+        Firestore.instance
+            .collection("orders")
+            .document(id.toString())
+            .setData({
+          'orderId': id,
+          'producIds': ProductIds,
+          'quantity': ProductQuantity,
+          'total': _total,
+          'userId': _currentUser.uid,
+          'timestamp': DateTime.now(),
+          'sub-total': _subTotal,
+          'tax': _tax,
+          'shipping': _shipping,
+          'address': addressController.text,
+          'state': stateController.text,
+          'city': cityController.text,
+          'receiverName': userNameController.text,
+          'paymentType': radioItem
+        }).catchError((onError) {
+          print(onError);
+        });
+        buildSuccessDialog("Order Placed Sucessfully", context);
+        for (var product in _cartProductList) {
+          DocumentSnapshot doc = await Firestore.instance.collection('products').document(product.productId.toString()).get();
+          var quantity = doc.data['quatity'];
+          // print(quantity);
+          await Firestore.instance.collection('products').document(product.productId.toString()).updateData({
+            'quatity': quantity - product.quantity
+          });
+          // print("CartId:${product.cartId}");
+          await Firestore.instance
+              .collection("carts")
+              .document(product.cartId.toString())
+              .delete();
+          Navigator.push(context, MaterialPageRoute(builder: (context) => UserOrderPage(orderId: id.toString(), currentUser: widget.currentUser,)));
+        }
+      } else {
+        buildErrorDialog("Fill in all details!", context);
+      }
+    }
 
     Widget _buildAddress() {
       return Padding(
@@ -158,107 +235,20 @@ class _BuyPageState extends State<BuyPage> {
                   SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            "Address",
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
-                          SizedBox(height: 10),
-                          _buildAddress(),
-                          SizedBox(height: 20),
-                          Text(
-                            "City",
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
-                          SizedBox(height: 10),
-                          _buildCity(),
-                          SizedBox(height: 20),
-                          Text(
-                            "State",
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
-                          SizedBox(height: 10),
-                          _buildState(),
-                          SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
+                  buildOrderSummary(context),
                   SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            "Select Payment",
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
-                          Column(
-                            children: <Widget>[
-                              RadioListTile(
-                                activeColor: Theme.of(context).primaryColor,
-                                groupValue: radioItem,
-                                title: Text('Cash on Delivery(COD)'),
-                                value: 'COD',
-                                onChanged: (val) {
-                                  setState(() {
-                                    radioItem = val;
-                                  });
-                                },
-                              ),
-                              RadioListTile(
-                                activeColor: Theme.of(context).primaryColor,
-                                groupValue: radioItem,
-                                title: Text('Online'),
-                                value: 'Online',
-                                onChanged: (val) {
-                                  setState(() {
-                                    radioItem = val;
-                                  });
-                                },
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
+                  buildLocation(
+                      context, _buildAddress, _buildCity, _buildState),
                   SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            "Enter the name of the receiver",
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          _buildUsername(),
-                        ],
-                      ),
-                    ),
+                  buildPayment(context),
+                  SizedBox(
+                    height: 20,
                   ),
+                  buildReceiverDetails(context, _buildUsername),
                   SizedBox(
                     height: 20,
                   ),
@@ -272,7 +262,7 @@ class _BuyPageState extends State<BuyPage> {
                       }),
                       buildRaisedButton("Proceed",
                           Theme.of(context).primaryColor, Colors.white, () {
-                        print("procees");
+                        handlePlaceOrder();
                       }),
                     ],
                   ),
@@ -281,6 +271,225 @@ class _BuyPageState extends State<BuyPage> {
                   )
                 ],
               ))),
+    );
+  }
+
+  Container buildReceiverDetails(
+      BuildContext context, Widget _buildUsername()) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Enter the name of the receiver",
+              style: Theme.of(context).textTheme.subtitle,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            _buildUsername(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container buildPayment(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Select Payment",
+              style: Theme.of(context).textTheme.subtitle,
+            ),
+            Column(
+              children: <Widget>[
+                RadioListTile(
+                  activeColor: Theme.of(context).primaryColor,
+                  groupValue: radioItem,
+                  title: Text('Cash on Delivery(COD)'),
+                  value: 'COD',
+                  onChanged: (val) {
+                    setState(() {
+                      radioItem = val;
+                    });
+                  },
+                ),
+                RadioListTile(
+                  activeColor: Theme.of(context).primaryColor,
+                  groupValue: radioItem,
+                  title: Text('Online'),
+                  value: 'Online',
+                  onChanged: (val) {
+                    setState(() {
+                      radioItem = val;
+                    });
+                  },
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container buildLocation(BuildContext context, Widget _buildAddress(),
+      Widget _buildCity(), Widget _buildState()) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              "Address",
+              style: Theme.of(context).textTheme.subtitle,
+            ),
+            SizedBox(height: 10),
+            _buildAddress(),
+            SizedBox(height: 20),
+            Text(
+              "City",
+              style: Theme.of(context).textTheme.subtitle,
+            ),
+            SizedBox(height: 10),
+            _buildCity(),
+            SizedBox(height: 20),
+            Text(
+              "State",
+              style: Theme.of(context).textTheme.subtitle,
+            ),
+            SizedBox(height: 10),
+            _buildState(),
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container buildOrderSummary(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.all(20),
+            color: Color(0xffECECEC),
+            child: Center(
+              child: Text(
+                "Order Summary",
+                style: Theme.of(context).textTheme.subtitle,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Center(
+                child: Text(
+              "Shipping and additional costs are calculated based on value you have entered",
+              style: TextStyle(color: Colors.grey),
+            )),
+          ),
+          // SizedBox(height: 10),
+          Center(
+              child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Divider(
+                    height: 10,
+                  ))),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  "Sub-Total",
+                ),
+                Text(
+                  "₹" + _subTotal.toString(),
+                ),
+              ],
+            ),
+          ),
+          Center(
+              child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Divider(
+                    height: 10,
+                  ))),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  "Shipping",
+                ),
+                Text(
+                  "₹" + _shipping.toString(),
+                ),
+              ],
+            ),
+          ),
+          Center(
+              child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Divider(
+                    height: 10,
+                  ))),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  "Tax",
+                ),
+                Text(
+                  "₹" + _tax.toString(),
+                ),
+              ],
+            ),
+          ),
+          Center(
+              child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Divider(
+                    height: 10,
+                  ))),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  "Total",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "₹" + _total.toString(),
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 
@@ -301,43 +510,47 @@ class _BuyPageState extends State<BuyPage> {
                     child: Row(
                       children: <Widget>[
                         SizedBox(width: 10.0),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Center(
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        image: NetworkImage(
-                                            product.thumbnailImage))),
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Center(
+                                child: Container(
+                                  width: 100,
+                                  height: 100,
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: NetworkImage(
+                                              product.thumbnailImage))),
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 7.0),
-                            Text(
-                              product.productName,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                  color: Colors.grey),
-                            ),
-                            SizedBox(height: 7.0),
-                            Row(
-                              children: <Widget>[
-                                Text(
-                                  '₹ ' + product.price.toString(),
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                                SizedBox(width: 30),
-                                Text(
-                                  "Quantity:" + product.quantity.toString(),
-                                  style: TextStyle(fontSize: 14),
-                                ),
-                              ],
-                            )
-                          ],
+                              SizedBox(height: 7.0),
+                              Text(
+                                product.productName,
+                                overflow: TextOverflow.fade,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                    color: Colors.grey),
+                              ),
+                              SizedBox(height: 7.0),
+                              Row(
+                                children: <Widget>[
+                                  Text(
+                                    '₹ ' + product.price.toString(),
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                  SizedBox(width: 30),
+                                  Text(
+                                    "Quantity:" + product.quantity.toString(),
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
                         )
                       ],
                     )))),

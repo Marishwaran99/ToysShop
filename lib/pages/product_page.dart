@@ -182,15 +182,13 @@ class BuildProductCard extends StatelessWidget {
 
   final Custom custom;
   handleCart(ProductList product, BuildContext context) async {
-    print(product.id);
-    print(currentUser.uid);
     try {
       QuerySnapshot doc =
           await Firestore.instance.collection('carts').getDocuments();
       print(doc.documents.length);
       bool isInCart = false;
       print(doc.documents.map((f) {
-        if (f.data['productId'] == product.id) {
+        if (f.data['productId'] == product.id && f.data['userId'] == currentUser.uid) {
           isInCart = true;
         } else {
           isInCart = false;
@@ -281,8 +279,7 @@ class BuildProductCard extends StatelessWidget {
                                   p.discount.toString() + "%",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.bold),
+                                      fontSize: 8, fontWeight: FontWeight.bold),
                                 ),
                               )))
                       : Container()
@@ -298,23 +295,12 @@ class BuildProductCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text(
-                              '${p.title}',
-                              overflow: TextOverflow.fade,
-                              style: Theme.of(context).textTheme.headline,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: IconButton(icon: fav ? Icon(FontAwesome.heart, size: 15,color: Colors.red,) : Icon(FontAwesome.heart_o, size: 15,color: Colors.red,), onPressed: (){
-                                fav = !fav;
-                                print(fav);
-                              }),
-                            )
-                          ],
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 4),
+                        child: Text(
+                          '${p.title}',
+                          overflow: TextOverflow.fade,
+                          style: Theme.of(context).textTheme.headline,
                         ),
                       ),
                       Text(
@@ -331,20 +317,53 @@ class BuildProductCard extends StatelessWidget {
                                       .toString(),
                               style: custom.cardTitleTextStyle),
                           p.discount > 0
-                      ? Text('₹ ' + p.price.toString(),
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.lineThrough)) : Text(""),
+                              ? Text('₹ ' + p.price.toString(),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.lineThrough))
+                              : Text(""),
                         ],
                       ),
-                      buildRaisedButton("Add to Cart", Colors.white,
-                          Theme.of(context).primaryColor, () {
-                        handleCart(p, context);
-                      }),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          buildRaisedButton("Add to Cart", Colors.white,
+                              Theme.of(context).primaryColor, () {
+                            handleCart(p, context);
+                          }),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: IconButton(
+                                      icon: fav
+                                          ? Icon(
+                                              FontAwesome.heart,
+                                              size: 15,
+                                              color: Colors.red,
+                                            )
+                                          : Icon(
+                                              FontAwesome.heart_o,
+                                              size: 15,
+                                              color: Colors.red,
+                                            ),
+                                      onPressed: () {
+                                        fav = !fav;
+                                        print(fav);
+                                      }),
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
@@ -352,3 +371,30 @@ class BuildProductCard extends StatelessWidget {
     );
   }
 }
+// Padding(
+//                     padding: const EdgeInsets.only(top: 5),
+//                     child: Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: <Widget>[
+//                         Padding(
+//                           padding: const EdgeInsets.only(right: 10),
+//                           child: IconButton(
+//                               icon: fav
+//                                   ? Icon(
+//                                       FontAwesome.heart,
+//                                       size: 15,
+//                                       color: Colors.red,
+//                                     )
+//                                   : Icon(
+//                                       FontAwesome.heart_o,
+//                                       size: 15,
+//                                       color: Colors.red,
+//                                     ),
+//                               onPressed: () {
+//                                 fav = !fav;
+//                                 print(fav);
+//                               }),
+//                         )
+//                       ],
+//                     ),
+//                   ),
