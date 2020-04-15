@@ -100,6 +100,7 @@ class _BuyPageState extends State<BuyPage> {
       // print(radioItem);
       List ProductIds = List();
       List ProductQuantity = List();
+      List ProductName = List();
       print(ProductIds);
       if (addressController.text != null &&
           userNameController.text != null &&
@@ -109,7 +110,7 @@ class _BuyPageState extends State<BuyPage> {
         for (var product in _cartProductList) {
           ProductIds.add(product.productId);
           ProductQuantity.add(product.quantity);
-          
+          ProductName.add((product.productName));
         }
         int id = DateTime.now().millisecondsSinceEpoch;
         // print(id);
@@ -117,6 +118,7 @@ class _BuyPageState extends State<BuyPage> {
             .collection("orders")
             .document(id.toString())
             .setData({
+              'productName': ProductName,
           'orderId': id,
           'producIds': ProductIds,
           'quantity': ProductQuantity,
@@ -130,7 +132,8 @@ class _BuyPageState extends State<BuyPage> {
           'state': stateController.text,
           'city': cityController.text,
           'receiverName': userNameController.text,
-          'paymentType': radioItem
+          'paymentType': radioItem,
+          'status': 'pending'
         }).catchError((onError) {
           print(onError);
         });

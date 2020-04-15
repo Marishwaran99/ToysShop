@@ -191,9 +191,9 @@ class _EditPageState extends State<EditPage> {
     FirebaseStorage.instance.ref().child(fileUrl).delete().then((value) {}).catchError((onError){print(onError.message);});
   }
 
+  
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentUserInfo();
   }

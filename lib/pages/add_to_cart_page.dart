@@ -143,6 +143,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
               )
             : Center(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Text(
                       "No Items in Cart",
@@ -153,8 +154,8 @@ class _AddToCartPageState extends State<AddToCartPage> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ProductPage(
-                                    currentUser: widget.currentUser,
+                              builder: (context) => MyHomePage(
+                                    details: widget.currentUser,
                                   )));
                     })
                   ],

@@ -1,26 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/user_order_page.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/widget.dart';
-import 'admin_page.dart';
 
-class OrderPage extends StatefulWidget {
+class DeliveredPage extends StatefulWidget {
   User currentUser;
-  OrderPage({this.currentUser});
+  DeliveredPage({this.currentUser});
 
   @override
-  _OrderPageState createState() => _OrderPageState();
+  _DeliveredPageState createState() => _DeliveredPageState();
 }
 
-class _OrderPageState extends State<OrderPage> {
+class _DeliveredPageState extends State<DeliveredPage> {
   List<orderModel> _orderList = List<orderModel>();
   getOrderDetails() async {
     QuerySnapshot snapshots = await Firestore.instance
         .collection('orders')
+        .where('status', isEqualTo: 'dispatched')
         .getDocuments();
 
     List<orderModel> order = snapshots.documents
@@ -30,12 +29,13 @@ class _OrderPageState extends State<OrderPage> {
     setState(() {
       _orderList = order;
     });
+    print(_orderList.length);
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
     getOrderDetails();
   }
 
@@ -46,7 +46,7 @@ class _OrderPageState extends State<OrderPage> {
       body: SingleChildScrollView(
           child: Center(
         child: _orderList.length == 0
-            ? Text("No Orders Request!")
+            ? Text("No Delivered Request!")
             : Container(
                 width: MediaQuery.of(context).size.width * 0.9,
                 color: Colors.white,
@@ -58,7 +58,7 @@ class _OrderPageState extends State<OrderPage> {
                       color: Color(0xffECECEC),
                       child: Center(
                         child: Text(
-                          "Orders Request",
+                          "Delivered Request",
                           style: Theme.of(context).textTheme.subtitle,
                         ),
                       ),
@@ -79,11 +79,9 @@ class _OrderPageState extends State<OrderPage> {
     );
   }
 
-  handleDispatch(String orderId){
-    print(orderId); 
-    Firestore.instance.collection('orders').document(orderId).updateData({
-      'status': 'dispatched'
-    });
+  handleDelivered(String orderId) {
+    print(orderId);
+    Firestore.instance.collection('orders').document(orderId).delete();
     getOrderDetails();
   }
 
@@ -121,19 +119,22 @@ class _OrderPageState extends State<OrderPage> {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: order.productName.map((f) {
-              return Row(
-                children: <Widget>[
-                  Text(f.toString()),
-                ],
-              );
-            }).toList()),
+                  return Row(
+                    children: <Widget>[
+                      Text(f.toString()),
+                    ],
+                  );
+                }).toList()),
             Column(
                 children: order.quantity.map((f) {
               return Row(
                 children: <Widget>[
-                  Text("("+f.toString()+")", style: TextStyle(color: Colors.grey),),
+                  Text(
+                    "(" + f.toString() + ")",
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ],
               );
             }).toList()),
@@ -188,10 +189,16 @@ class _OrderPageState extends State<OrderPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Text(
-              "Dispatch",
+              "Delivered",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            order.status == "pending" ? buildRaisedButton("Confirm", Theme.of(context).primaryColor, Colors.white, (){handleDispatch(order.orderId.toString());}) : Text("Confirmed")
+            order.status == "dispatched"
+                ? buildRaisedButton(
+                    "Confirm", Theme.of(context).primaryColor, Colors.white,
+                    () {
+                    handleDelivered(order.orderId.toString());
+                  })
+                : Text("Confirmed")
           ],
         ),
         Center(

@@ -10,6 +10,7 @@ import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/admin/admin_page.dart';
 import 'package:toys/pages/edit_page.dart';
 import 'package:toys/pages/forget_password.dart';
+import 'package:toys/pages/order.dart';
 import 'package:toys/pages/view_image.dart';
 import 'package:toys/widgets/customLoading.dart';
 import 'package:toys/widgets/widget.dart';
@@ -70,7 +71,17 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
     print(currentUser.role);
+    QuerySnapshot snapshots = await Firestore.instance
+        .collection('orders')
+        .where('userId', isEqualTo: currentUser.uid)
+        .getDocuments();
+    setState(() {
+      _orderCount = snapshots.documents.length;
+    });
+    print(_orderCount);
   }
+
+  int _orderCount = 0;
 
   @override
   void initState() {
@@ -247,15 +258,68 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
-                    ActionCard(Icons.list, "Orders", () {}),
-                    ActionCard(Icons.edit, "Edit", () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EditPage(
-                                    details: widget.details,
-                                  )));
-                    }),
+                    Stack(
+                      children: <Widget>[
+                        ActionCard(Icons.list, "Orders", () {Navigator.push(context, MaterialPageRoute(builder: (context) => Order(currentUser: currentUser,)));}),
+                        _orderCount == 0
+                            ? Text('')
+                            : Padding(
+                                padding: const EdgeInsets.only(left: 50),
+                                child: Container(
+                                  width: 15,
+                                  height: 15,
+                                  alignment: Alignment.center,
+                                  // padding: EdgeInsets.symmetric(
+                                  //     horizontal: 4, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  child: Text(
+                                    _orderCount.toString(),
+                                    style: TextStyle(
+                                        fontSize: 11, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+                    Stack(
+                      children: <Widget>[
+                        ActionCard(Icons.edit, "Edit", () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => EditPage(
+                                        details: widget.details,
+                                      )));
+                        }),
+                        currentUser.address != ""
+                            ? Text('')
+                            : Padding(
+                                padding: const EdgeInsets.only(left: 50),
+                                child: Container(
+                                  width: 15,
+                                  height: 15,
+                                  alignment: Alignment.center,
+                                  // padding: EdgeInsets.symmetric(
+                                  //     horizontal: 4, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  child: Text(
+                                    '!',
+                                    style: TextStyle(
+                                        fontSize: 11, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                      
+                      ],
+                    ),
                     ActionCard(CupertinoIcons.heart_solid, "Wishlist", () {}),
                     ActionCard(Icons.exit_to_app, "Logout", () {
                       showAlert(context);
@@ -575,7 +639,7 @@ class _LoginPageState extends State<LoginPage> {
         AuthResult userDetails = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: _email, password: _password);
         print("Email:${userDetails.user.email}");
-        
+
         DocumentSnapshot doc = await Firestore.instance
             .collection('users')
             .document(userDetails.user.uid)
@@ -700,17 +764,17 @@ class _LoginPageState extends State<LoginPage> {
         .document(userDetails.user.uid)
         .get();
 
-      User details = new User(
-          doc.data['uid'],
-          doc.data['displayName'],
-          doc.data['email'],
-          doc.data['address'],
-          doc.data['city'],
-          doc.data['state'],
-          doc.data['photoUrl'],
-          doc.data['loginType'],
-          doc.data['role'],
-        );
+    User details = new User(
+      doc.data['uid'],
+      doc.data['displayName'],
+      doc.data['email'],
+      doc.data['address'],
+      doc.data['city'],
+      doc.data['state'],
+      doc.data['photoUrl'],
+      doc.data['loginType'],
+      doc.data['role'],
+    );
 
     if (!doc.exists) {
       Firestore.instance

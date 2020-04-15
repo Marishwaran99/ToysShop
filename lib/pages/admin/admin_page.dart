@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/models/userModel.dart';
 import 'package:toys/pages/admin/delete_page.dart';
+import 'package:toys/pages/admin/delivered_page.dart';
 import 'package:toys/pages/admin/order_page.dart';
 import 'package:toys/pages/admin/upload_page.dart';
 import 'package:toys/pages/admin/view_page.dart';
@@ -22,10 +23,21 @@ class AdminPage extends StatefulWidget {
 
 class _AdminPageState extends State<AdminPage> {
   TextEditingController emailController = TextEditingController();
+  int _orderCount;
+  getOrderCount() async {
+    QuerySnapshot snapshots =
+        await Firestore.instance.collection('orders').getDocuments();
+
+    setState(() {
+      _orderCount = snapshots.documents.length;
+    });
+    print(_orderCount);
+  }
 
   @override
   void initState() {
     super.initState();
+    getOrderCount();
   }
 
   @override
@@ -43,10 +55,58 @@ class _AdminPageState extends State<AdminPage> {
         automaticallyImplyLeading: false,
         leading: widget.currentUser != null ? DrawerIcon() : null,
         backgroundColor: Colors.white,
+        actions: <Widget>[
+          _orderCount == 0
+              ? Text('')
+              : Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => OrderPage(
+                                      currentUser: widget.currentUser,
+                                    )));
+                      },
+                      child: Stack(
+                        children: <Widget>[
+                          Icon(
+                            Icons.notifications,
+                            color: Colors.grey,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: Container(
+                              width: 15,
+                              height: 15,
+                              alignment: Alignment.center,
+                              // padding: EdgeInsets.symmetric(
+                              //     horizontal: 4, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              child: Text(
+                                _orderCount.toString(),
+                                style: TextStyle(
+                                    fontSize: 11, color: Colors.white),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+        ],
       ),
       drawer: widget.currentUser != null
           ? AdminDrawer(
               currentUser: widget.currentUser,
+              orderCount: _orderCount,
             )
           : null,
       body: Center(
@@ -101,7 +161,8 @@ class UserList extends StatelessWidget {
                 );
               return new DropdownButton<String>(
                 isDense: true,
-                hint: _mySelection == null ? Text("Select") : Text(_mySelection),
+                hint:
+                    _mySelection == null ? Text("Select") : Text(_mySelection),
                 value: _mySelection,
                 onChanged: (String newValue) {
                   _mySelection = newValue;
@@ -137,7 +198,8 @@ class UserList extends StatelessWidget {
                 Navigator.pop(context);
               }),
               buildRaisedButton(
-                  "Make Admin", Theme.of(context).primaryColor, Colors.white, () {
+                  "Make Admin", Theme.of(context).primaryColor, Colors.white,
+                  () {
                 makeAdmin();
               }),
             ],
@@ -216,7 +278,8 @@ class DrawerIcon extends StatelessWidget {
 
 class AdminDrawer extends StatelessWidget {
   User currentUser;
-  AdminDrawer({this.currentUser});
+  int orderCount;
+  AdminDrawer({this.currentUser, this.orderCount});
 
   @override
   Widget build(BuildContext context) {
@@ -246,25 +309,46 @@ class AdminDrawer extends StatelessWidget {
       },
       () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => OrderPage(currentUser: currentUser,)));
-      },
-      () {
-        print("Delivered Product");
-      },
-      () {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (context) => UploadPage(currentUser: currentUser,)));
+            context,
+            MaterialPageRoute(
+                builder: (context) => OrderPage(
+                      currentUser: currentUser,
+                    )));
       },
       () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => DeletePage(currentUser: currentUser,)));
+            context,
+            MaterialPageRoute(
+                builder: (context) => DeliveredPage(
+                      currentUser: currentUser,
+                    )));
+      },
+      () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => UploadPage(
+                      currentUser: currentUser,
+                    )));
+      },
+      () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => DeletePage(
+                      currentUser: currentUser,
+                    )));
       },
       () {
         print("Update");
       },
       () {
         Navigator.push(
-            context, MaterialPageRoute(builder: (context) => ViewPage(currentUser: currentUser,)));
+            context,
+            MaterialPageRoute(
+                builder: (context) => ViewPage(
+                      currentUser: currentUser,
+                    )));
       },
       () {
         print("Online");
@@ -299,7 +383,33 @@ class AdminDrawer extends StatelessWidget {
                 itemBuilder: (BuildContext context, i) {
                   return new ListTile(
                     title: new Text(data[i]),
-                    leading: Icon(icon[i]),
+                    leading: orderCount != 0 && data[i] == 'Order Request'
+                        ? Stack(
+                            children: <Widget>[
+                              Icon(icon[i]),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 18),
+                                child: Container(
+                                  width: 15,
+                                  height: 15,
+                                  alignment: Alignment.center,
+                                  // padding: EdgeInsets.symmetric(
+                                  //     horizontal: 4, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  child: Text(
+                                    orderCount.toString(),
+                                    style: TextStyle(
+                                        fontSize: 11, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        : Icon(icon[i]),
                     onTap: onPressed[i],
                   );
                 }),
