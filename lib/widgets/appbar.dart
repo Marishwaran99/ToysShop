@@ -8,23 +8,19 @@ import 'package:toys_shop/styles/custom.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Custom custom = Custom();
-  final bool back;
-  final GestureTapCallback onPressed;
-  MyAppBar({this.back, this.onPressed});
+  final String title;
+  MyAppBar({this.title});
   @override
   Widget build(BuildContext context) {
     return AppBar(
-        elevation: 0,
-        title: Row(
-          children: <Widget>[
-            Text(
-              'Toys',
-              style: custom.appbarTitleTextStyle,
-            ),
-          ],
-        ));
+      elevation: 0,
+      title: Text(
+        title,
+        style: custom.appbarTitleTextStyle,
+      ),
+    );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(56);
+  Size get preferredSize => Size.fromHeight(48);
 }

@@ -21,31 +21,43 @@ class _ProductCarouselState extends State<ProductCarousel> {
   List<Product> productsList = [
     Product(
       productId: '101',
-      title:'Octopus Shootout',
-      description:"This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
-      thumbnailImage :'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
-      price:5000,
+      title: 'Octopus Shootout',
+      description:
+          "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
+      thumbnailImage: {
+        'image':
+            'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+        'id': '1234'
+      },
+      price: 5000,
     ),
     Product(
       productId: '102',
-      title:'Octopus Shootout',
-      description:"This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
+      title: 'Octopus Shootout',
+      description:
+          "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
       discount: 20,
-      thumbnailImage :
-      'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products27129-640x640-179261172.jpg',
-      price:2200,
+      thumbnailImage: {
+        'image':
+            'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+        'id': '1234'
+      },
+      price: 2200,
     ),
     Product(
       productId: '103',
-      title:'Octopus Shootout',
-      description:"This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
-      thumbnailImage :
-      'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products24313-640x640-81332367.jpg',
+      title: 'Octopus Shootout',
+      description:
+          "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
+      thumbnailImage: {
+        'image':
+            'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+        'id': '1234'
+      },
       price: 1000,
     ),
-   
   ];
- 
+
   List<Wishlist> inwishlistProductIds;
   var _dbhelper = WishlistDBHelper();
   void updateWishlist() {
@@ -159,7 +171,8 @@ class _ProductCardState extends State<ProductCard> {
                           color: Colors.white,
                           image: DecorationImage(
                               fit: BoxFit.contain,
-                              image: NetworkImage(_product.thumbnailImage)))),
+                              image: NetworkImage(
+                                  _product.thumbnailImage['image'])))),
                   _product.discount != null && _product.discount > 0
                       ? Align(
                           alignment: Alignment.topRight,

@@ -28,7 +28,7 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: MyAppBar(back: false,),
+        appBar: MyAppBar(title: toggleSignUp ? 'Sign up' : 'Login'),
         body: Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Form(
@@ -83,7 +83,7 @@ class _AuthPageState extends State<AuthPage> {
       children: <Widget>[
         Text(
           "Username",
-          style: Custom().bodyTextStyle,
+          style: Custom().inputLabelTextStyle,
         ),
         SizedBox(height: 4),
         Container(
@@ -113,7 +113,7 @@ class _AuthPageState extends State<AuthPage> {
       children: <Widget>[
         Text(
           "Email Address",
-          style: Custom().bodyTextStyle,
+          style: Custom().inputLabelTextStyle,
         ),
         SizedBox(height: 4),
         Container(
@@ -143,7 +143,7 @@ class _AuthPageState extends State<AuthPage> {
       children: <Widget>[
         Text(
           "Password",
-          style: Custom().bodyTextStyle,
+          style: Custom().inputLabelTextStyle,
         ),
         SizedBox(height: 4),
         Container(
@@ -152,6 +152,7 @@ class _AuthPageState extends State<AuthPage> {
           decoration: BoxDecoration(
               color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
           child: TextFormField(
+            keyboardType: TextInputType.visiblePassword,
             style: Custom().inputTextStyle,
             obscureText: true,
             maxLines: 1,

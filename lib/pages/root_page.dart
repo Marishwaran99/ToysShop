@@ -4,6 +4,7 @@ import 'package:toys_shop/pages/home_page.dart';
 import 'package:toys_shop/pages/main_page.dart';
 import 'package:toys_shop/services/auth.dart';
 import 'package:toys_shop/services/datastore.dart';
+import 'package:toys_shop/widgets/loading.dart';
 
 enum AuthStatus {
   NOT_LOGGED_IN,
@@ -71,7 +72,7 @@ class _RootPageState extends State<RootPage> {
         );
         break;
       default:
-        return AuthPage();
+        return Loading();
     }
   }
 }

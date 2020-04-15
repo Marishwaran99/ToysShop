@@ -1,0 +1,158 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:toys_shop/models/product.dart';
+import 'package:toys_shop/pages/add_product_page.dart';
+import 'package:toys_shop/pages/product_detail_page.dart';
+import 'package:toys_shop/services/datastore.dart';
+import 'package:toys_shop/styles/custom.dart';
+import 'package:toys_shop/widgets/in_section_spacing.dart';
+
+class ViewAllProductPage extends StatefulWidget {
+  final Datastore datastore;
+  ViewAllProductPage({this.datastore});
+  @override
+  _ViewAllProductPageState createState() => _ViewAllProductPageState();
+}
+
+class _ViewAllProductPageState extends State<ViewAllProductPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(
+          'All Products',
+          style: Custom().appbarTitleTextStyle,
+        ),
+        leading: IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
+      ),
+      body: StreamBuilder(
+          stream: Firestore.instance.collection('products').snapshots(),
+          builder: (BuildContext ctx, AsyncSnapshot<QuerySnapshot> snapshot) {
+            return ListView.builder(
+                itemCount: snapshot.data.documents.length,
+                itemBuilder: (BuildContext cx, int i) {
+                  Map<String, dynamic> productMap =
+                      snapshot.data.documents[i].data;
+                  List<Map<String, dynamic>> previewImages =
+                      productMap['previewImages'].cast<Map<String, dynamic>>();
+                  log(productMap["previewImages"].toString());
+                  Product _product = Product(
+                      title: productMap["title"],
+                      description: productMap["description"],
+                      price: productMap["price"],
+                      discount: productMap["discount"],
+                      stock: productMap["stock"],
+                      thumbnailImage: productMap["thumbImage"],
+                      previewImages: previewImages);
+                  return ProductCard(_product, widget.datastore);
+                });
+          }),
+      floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (BuildContext ctx) {
+              return AddProductPage(
+                datastore: widget.datastore,
+              );
+            }));
+          }),
+    );
+  }
+}
+
+class ProductCard extends StatefulWidget {
+  final Product product;
+  final Datastore datastore;
+  ProductCard(this.product, this.datastore);
+  @override
+  _ProductCardState createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (BuildContext ctx) {
+          return ProductPageDetailPage(widget.product);
+        }));
+      },
+      child: Container(
+          color: Colors.grey[100],
+          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: <Widget>[
+              widget.product.thumbnailImage['image'] != null
+                  ? Stack(
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          height: 150,
+                          decoration: BoxDecoration(
+                              image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: NetworkImage(
+                                      widget.product.thumbnailImage['image']))),
+                        ),
+                        widget.product.discount != null
+                            ? Align(
+                                alignment: Alignment.topLeft,
+                                child: Container(
+                                    width: 64,
+                                    height: 64,
+                                    decoration: BoxDecoration(
+                                        color: Colors.pink[100],
+                                        borderRadius:
+                                            BorderRadius.circular(64)),
+                                    child: Center(
+                                      child: Text(
+                                        widget.product.discount.toString() +
+                                            '% OFF',
+                                        style: Custom().captionTextStyle,
+                                      ),
+                                    )),
+                              )
+                            : Container(),
+                      ],
+                    )
+                  : Container(),
+              SizedBox(width: 16),
+              Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Container(
+                        width: MediaQuery.of(context).size.width -
+                            MediaQuery.of(context).size.width * 0.4 -
+                            48,
+                        child: Text(widget.product.title,
+                            style: Custom().cardTitleTextStyle)),
+                    InSectionSpacing(),
+                    Text('₹ ' + widget.product.price.toString(),
+                        style: Custom().bodyTextStyle),
+                    IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (BuildContext ctx) {
+                            return AddProductPage(
+                              datastore: widget.datastore,
+                              product: widget.product,
+                            );
+                          }));
+                        })
+                  ])
+            ],
+          )),
+    );
+  }
+}

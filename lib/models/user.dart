@@ -2,27 +2,33 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:toys_shop/models/review.dart';
 
 class User {
-  String uid, username, email, address;
+  String uid, username, email, photoUrl;
+  Map<String, dynamic> deliveryAddress;
   List<String> cartProducts, boughtProducts;
   List<Review> reviews;
-
+  String role;
   User(
       {this.uid,
       this.username,
       this.email,
-      this.address,
+      this.photoUrl,
+      this.deliveryAddress,
       this.cartProducts,
       this.boughtProducts,
-      this.reviews});
+      this.reviews,
+      this.role});
   Map<String, dynamic> toMap() {
     return {
       'uid': uid ?? '',
       'name': username ?? '',
       'email': email ?? '',
-      'address': address ?? '',
+      'photoUrl': photoUrl ?? '',
+      'deliveryAddress': deliveryAddress ??
+          {'address': '', 'pincode': '', 'state': '', 'city': ''},
       'cartProducts': cartProducts ?? [],
       'boughtProducts': boughtProducts ?? [],
       'reviews': reviews ?? [],
+      'role': role ?? ''
     };
   }
 
@@ -31,7 +37,7 @@ class User {
     return User(
         username: snapshot["username"],
         email: snapshot["email"],
-        address: snapshot["address"],
+        deliveryAddress: snapshot["deliveryAddress"],
         cartProducts: snapshot["cartProducts"],
         boughtProducts: snapshot["boughtProducts"],
         reviews: snapshot["reviews"]);
@@ -42,7 +48,7 @@ class User {
     return User(
         username: data["username"] ?? '',
         email: data["email"] ?? '',
-        address: data["address"] ?? '',
+        deliveryAddress: data["deliveryAddress"] ?? '',
         cartProducts: data["cartProducts"] ?? [],
         boughtProducts: data["boughtProducts"] ?? [],
         reviews: data["reviews"] ?? 0);

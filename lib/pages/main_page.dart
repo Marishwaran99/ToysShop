@@ -30,7 +30,7 @@ class _MainPageState extends State<MainPage> {
   ];
   Custom custom = Custom();
   List<Widget> _screens;
-
+  var titles = ["Toys", "Products", "Shopping Cart", "Profile"];
   @override
   void initState() {
     super.initState();
@@ -53,10 +53,7 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.white,
         key: _scaffoldKey,
         appBar: MyAppBar(
-          back: false,
-          onPressed: () {
-            _scaffoldKey.currentState.openDrawer();
-          },
+          title: titles[_index],
         ),
         body: _screens[_index],
         bottomNavigationBar: AnimatedBottomBar(

@@ -9,6 +9,7 @@ import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/appbar.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
+import 'package:toys_shop/widgets/section_spacing.dart';
 
 class WishlistPage extends StatefulWidget {
   @override
@@ -22,8 +23,11 @@ class _WishlistPageState extends State<WishlistPage> {
       title: 'Octopus Shootout',
       description:
           "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
-      thumbnailImage:
-          'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+      thumbnailImage: {
+        'image':
+            'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+        'id': '1234'
+      },
       price: 5000,
     ),
     Product(
@@ -32,8 +36,11 @@ class _WishlistPageState extends State<WishlistPage> {
       description:
           "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
       discount: 20,
-      thumbnailImage:
-          'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products27129-640x640-179261172.jpg',
+      thumbnailImage: {
+        'image':
+            'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+        'id': '1234'
+      },
       price: 2200,
     ),
     Product(
@@ -41,8 +48,11 @@ class _WishlistPageState extends State<WishlistPage> {
       title: 'Octopus Shootout',
       description:
           "This game is a BLAST times EIGHT! High energy, frenetic gameplay lets you and your opponent take control of your Octopus and spin them frantically back and forth as you try to score more balls into your opponents goal. Don't let your guard down and let octopus spin out of control! Highest score WINS!",
-      thumbnailImage:
-          'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products24313-640x640-81332367.jpg',
+      thumbnailImage: {
+        'image':
+            'https://mmtcdn.blob.core.windows.net/084395e6770c4e0ebc5612f000acae8f/mmtcdn/Products26530-640x640-1897818831.jpg',
+        'id': '1234'
+      },
       price: 1000,
     ),
   ];
@@ -57,35 +67,21 @@ class _WishlistPageState extends State<WishlistPage> {
       updateWishlist();
     }
     return Scaffold(
-        appBar: MyAppBar(
-          back: true,
+        appBar: AppBar(
+          elevation: 0,
+          title: Text('Wishlist', style: Custom().appbarTitleTextStyle),
+          leading: IconButton(
+              icon: Icon(Icons.chevron_left),
+              onPressed: () {
+                Navigator.pop(context, true);
+              }),
         ),
         body: SingleChildScrollView(
             child: Container(
                 child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: SectionTitle('Wishlist'),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: FlatButton(
-                      onPressed: () {
-                        for (var p in inwishlistProductIds) {
-                          _dbhelper.deleteWishlist(p.id);
-                          inwishlistProductIds = [];
-                          setState(() {});
-                        }
-                      },
-                      child: Text('Clear All')),
-                )
-              ],
-            ),
+            InSectionSpacing(),
             Column(
                 children: productsList.map((p) {
               var w = false;
@@ -111,6 +107,14 @@ class _WishlistPageState extends State<WishlistPage> {
             }).toList()),
           ],
         ))));
+  }
+
+  deleteAllProductInWishlist() {
+    for (var p in inwishlistProductIds) {
+      _dbhelper.deleteWishlist(p.id);
+      inwishlistProductIds = [];
+      setState(() {});
+    }
   }
 
   void updateWishlist() {
@@ -154,7 +158,7 @@ class _WishlistProductState extends State<WishlistProduct> {
               decoration: BoxDecoration(
                   image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: NetworkImage(_product.thumbnailImage))),
+                      image: NetworkImage(_product.thumbnailImage['image']))),
             ),
             SizedBox(width: 8),
             Column(

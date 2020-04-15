@@ -2,14 +2,13 @@ import 'package:toys_shop/models/review.dart';
 
 class Product {
   String productId, title, description;
-  int productRating, stock, discount, price;
+  int stock, discount, price, productRating;
   List<Review> reviews;
-  List<String> previewImages;
-  String thumbnailImage;
+  List<Map<String, dynamic>> previewImages;
+  Map<String, dynamic> thumbnailImage;
 
   Product(
-      {
-      this.productId,
+      {this.productId,
       this.title,
       this.description,
       this.productRating,
@@ -31,7 +30,7 @@ class Product {
     map["reviews"] = this.reviews ?? [];
     map["price"] = this.price ?? 100;
     map["previewImages"] = this.previewImages ?? [];
-    map["thumbnailImage"] = this.thumbnailImage ?? '';
+    map["thumbnailImage"] = this.thumbnailImage ?? {};
     return map;
   }
 }
