@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/pages/product_detail_page.dart';
 
 // class Product{

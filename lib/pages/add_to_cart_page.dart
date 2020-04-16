@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/pages/buy_page.dart';
 import 'package:toys/pages/product_detail_page.dart';
 import 'package:toys/pages/product_page.dart';

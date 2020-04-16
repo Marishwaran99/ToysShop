@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:toys/models/product.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/pages/add_to_cart_page.dart';
 import 'package:toys/pages/product_detail_page.dart';
 import 'package:toys/pages/user_order_page.dart';
@@ -22,6 +23,7 @@ class _BuyPageState extends State<BuyPage> {
   int _subTotal = 0;
   int _shipping = 0;
   int _tax = 0, _total = 0;
+  Razorpay _razor;
   List<CartProductList> _cartProductList = List<CartProductList>();
   getCartProduct() async {
     QuerySnapshot snapshots = await Firestore.instance
@@ -56,16 +58,7 @@ class _BuyPageState extends State<BuyPage> {
         .document(widget.currentUser.uid)
         .get();
     // print(doc.data);
-    User details = new User(
-        doc.data['uid'],
-        doc.data['displayName'],
-        doc.data['email'],
-        doc.data['address'],
-        doc.data['city'],
-        doc.data['state'],
-        doc.data['photoUrl'],
-        doc.data['logintype'],
-        doc.data['role']);
+    User details = User.fromFirestore(doc);
     // print(details.username);
     setState(() {
       _currentUser = details;
@@ -79,6 +72,37 @@ class _BuyPageState extends State<BuyPage> {
     super.initState();
     getCartProduct();
     getCurrentUserInfo();
+    _razor = Razorpay();
+    _razor.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
+    _razor.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
+    _razor.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
+  }
+  int _id;
+
+  void handlePaymentSuccess(PaymentSuccessResponse response) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => UserOrderPage(
+                  orderId: _id.toString(),
+                  currentUser: widget.currentUser,
+                )));
+                // print(_id);
+  }
+
+  void handlePaymentError(PaymentFailureResponse response) {
+    print(response.message);
+  }
+
+  void handleExternalWallet(ExternalWalletResponse response) {
+    print(response.walletName);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _razor.clear();
   }
 
   @override
@@ -93,11 +117,6 @@ class _BuyPageState extends State<BuyPage> {
         TextEditingController(text: _currentUser.state);
 
     handlePlaceOrder() async {
-      // print(addressController.text);
-      // print(userNameController.text);
-      // print(cityController.text);
-      // print(stateController.text);
-      // print(radioItem);
       List ProductIds = List();
       List ProductQuantity = List();
       List ProductName = List();
@@ -113,44 +132,117 @@ class _BuyPageState extends State<BuyPage> {
           ProductName.add((product.productName));
         }
         int id = DateTime.now().millisecondsSinceEpoch;
-        // print(id);
-        Firestore.instance
-            .collection("orders")
-            .document(id.toString())
-            .setData({
-              'productName': ProductName,
-          'orderId': id,
-          'producIds': ProductIds,
-          'quantity': ProductQuantity,
-          'total': _total,
-          'userId': _currentUser.uid,
-          'timestamp': DateTime.now(),
-          'sub-total': _subTotal,
-          'tax': _tax,
-          'shipping': _shipping,
-          'address': addressController.text,
-          'state': stateController.text,
-          'city': cityController.text,
-          'receiverName': userNameController.text,
-          'paymentType': radioItem,
-          'status': 'pending'
-        }).catchError((onError) {
-          print(onError);
+        setState(() {
+          _id = id;
         });
-        buildSuccessDialog("Order Placed Sucessfully", context);
-        for (var product in _cartProductList) {
-          DocumentSnapshot doc = await Firestore.instance.collection('products').document(product.productId.toString()).get();
-          var quantity = doc.data['quatity'];
-          // print(quantity);
-          await Firestore.instance.collection('products').document(product.productId.toString()).updateData({
-            'quatity': quantity - product.quantity
+        // print(id);
+        if (radioItem == "Online") {
+          print(radioItem);
+          var options = {
+            'key': 'rzp_test_9SXPJw8jBRSDfa',
+            'amount': _total,
+            'name': widget.currentUser.username,
+            'description': 'Text Payment',
+            'prefill': {'contact': '', 'email': widget.currentUser.userEmail},
+            'external': {
+              'wallets': ['paytm']
+            }
+          };
+          try {
+            _razor.open(options);
+          } catch (e) {
+            print(e);
+          }
+          Firestore.instance
+              .collection("orders")
+              .document(id.toString())
+              .setData({
+            'productName': ProductName,
+            'orderId': id,
+            'producIds': ProductIds,
+            'quantity': ProductQuantity,
+            'total': _total,
+            'userId': _currentUser.uid,
+            'timestamp': DateTime.now(),
+            'sub-total': _subTotal,
+            'tax': _tax,
+            'shipping': _shipping,
+            'address': addressController.text,
+            'state': stateController.text,
+            'city': cityController.text,
+            'receiverName': userNameController.text,
+            'paymentType': radioItem,
+            'status': 'pending'
+          }).catchError((onError) {
+            print(onError);
           });
-          // print("CartId:${product.cartId}");
-          await Firestore.instance
-              .collection("carts")
-              .document(product.cartId.toString())
-              .delete();
-          Navigator.push(context, MaterialPageRoute(builder: (context) => UserOrderPage(orderId: id.toString(), currentUser: widget.currentUser,)));
+          buildSuccessDialog("Order Placed Sucessfully", context);
+          for (var product in _cartProductList) {
+            DocumentSnapshot doc = await Firestore.instance
+                .collection('products')
+                .document(product.productId.toString())
+                .get();
+            var quantity = doc.data['quatity'];
+            // print(quantity);
+            await Firestore.instance
+                .collection('products')
+                .document(product.productId.toString())
+                .updateData({'quatity': quantity - product.quantity});
+            // print("CartId:${product.cartId}");
+            await Firestore.instance
+                .collection("carts")
+                .document(product.cartId.toString())
+                .delete();
+          }
+        } else if (radioItem == "COD") {
+          Firestore.instance
+              .collection("orders")
+              .document(id.toString())
+              .setData({
+            'productName': ProductName,
+            'orderId': id,
+            'producIds': ProductIds,
+            'quantity': ProductQuantity,
+            'total': _total,
+            'userId': _currentUser.uid,
+            'timestamp': DateTime.now(),
+            'sub-total': _subTotal,
+            'tax': _tax,
+            'shipping': _shipping,
+            'address': addressController.text,
+            'state': stateController.text,
+            'city': cityController.text,
+            'receiverName': userNameController.text,
+            'paymentType': radioItem,
+            'status': 'pending'
+          }).catchError((onError) {
+            print(onError);
+          });
+          buildSuccessDialog("Order Placed Sucessfully", context);
+          for (var product in _cartProductList) {
+            DocumentSnapshot doc = await Firestore.instance
+                .collection('products')
+                .document(product.productId.toString())
+                .get();
+            var quantity = doc.data['quatity'];
+            // print(quantity);
+            await Firestore.instance
+                .collection('products')
+                .document(product.productId.toString())
+                .updateData({'quatity': quantity - product.quantity});
+            // print("CartId:${product.cartId}");
+            await Firestore.instance
+                .collection("carts")
+                .document(product.cartId.toString())
+                .delete();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => UserOrderPage(
+                          orderId: id.toString(),
+                          currentUser: widget.currentUser,
+                        )));
+          }
         }
       } else {
         buildErrorDialog("Fill in all details!", context);

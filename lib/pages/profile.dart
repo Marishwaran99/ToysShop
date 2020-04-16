@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:toys/main.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/pages/admin/admin_page.dart';
 import 'package:toys/pages/edit_page.dart';
 import 'package:toys/pages/forget_password.dart';
@@ -51,16 +51,7 @@ class _LoginPageState extends State<LoginPage> {
       DocumentSnapshot doc =
           await Firestore.instance.collection('users').document(user.uid).get();
       // print(doc.data);
-      User details = new User(
-          doc.data['uid'],
-          doc.data['displayName'],
-          doc.data['email'],
-          doc.data['address'],
-          doc.data['city'],
-          doc.data['state'],
-          doc.data['photoUrl'],
-          doc.data['logintype'],
-          doc.data['role']);
+      User details = User.fromFirestore(doc);
       setState(() {
         currentUser = details;
         _loading = false;
@@ -91,7 +82,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -260,7 +250,14 @@ class _LoginPageState extends State<LoginPage> {
                   children: <Widget>[
                     Stack(
                       children: <Widget>[
-                        ActionCard(Icons.list, "Orders", () {Navigator.push(context, MaterialPageRoute(builder: (context) => Order(currentUser: currentUser,)));}),
+                        ActionCard(Icons.list, "Orders", () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Order(
+                                        currentUser: currentUser,
+                                      )));
+                        }),
                         _orderCount == 0
                             ? Text('')
                             : Padding(
@@ -317,7 +314,6 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                               ),
-                      
                       ],
                     ),
                     ActionCard(CupertinoIcons.heart_solid, "Wishlist", () {}),
@@ -645,17 +641,7 @@ class _LoginPageState extends State<LoginPage> {
             .document(userDetails.user.uid)
             .get();
 
-        User details = new User(
-          doc.data['uid'],
-          doc.data['displayName'],
-          doc.data['email'],
-          doc.data['address'],
-          doc.data['city'],
-          doc.data['state'],
-          doc.data['photoUrl'],
-          doc.data['loginType'],
-          doc.data['role'],
-        );
+        User details = User.fromFirestore(doc);
 
         print("Username:" + details.username);
 
@@ -721,6 +707,7 @@ class _LoginPageState extends State<LoginPage> {
                   "address": "",
                   "city": "",
                   "state": "",
+                  "pincode": "",
                   "logintype": "signup",
                   "role": "user"
                 }))
@@ -743,10 +730,6 @@ class _LoginPageState extends State<LoginPage> {
 
   //Google Login
   Future<void> _googleLogin(BuildContext context) async {
-    Scaffold.of(context).showSnackBar(new SnackBar(
-      content: new Text('Logging in'),
-    ));
-
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
@@ -764,18 +747,6 @@ class _LoginPageState extends State<LoginPage> {
         .document(userDetails.user.uid)
         .get();
 
-    User details = new User(
-      doc.data['uid'],
-      doc.data['displayName'],
-      doc.data['email'],
-      doc.data['address'],
-      doc.data['city'],
-      doc.data['state'],
-      doc.data['photoUrl'],
-      doc.data['loginType'],
-      doc.data['role'],
-    );
-
     if (!doc.exists) {
       Firestore.instance
           .collection("users")
@@ -788,21 +759,44 @@ class _LoginPageState extends State<LoginPage> {
         "address": "",
         "city": "",
         "state": "",
-        "logintype": "google",
+        "loginType": "google",
         "role": "user"
       }).catchError((onError) => print(onError));
-    }
+      DocumentSnapshot doc = await Firestore.instance
+          .collection("users")
+          .document(userDetails.user.uid)
+          .get();
+      User details = User.fromFirestore(doc);
 
-    setState(() {
-      isAuth = true;
-      authResult = userDetails;
-    });
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => MyHomePage(
-                  details: details,
-                )));
+      setState(() {
+        isAuth = true;
+        authResult = userDetails;
+      });
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyHomePage(
+                    details: details,
+                  )));
+    } else {
+      DocumentSnapshot doc = await Firestore.instance
+          .collection("users")
+          .document(userDetails.user.uid)
+          .get();
+
+      User details = User.fromFirestore(doc);
+
+      setState(() {
+        isAuth = true;
+        authResult = userDetails;
+      });
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyHomePage(
+                    details: details,
+                  )));
+    }
   }
 }
 

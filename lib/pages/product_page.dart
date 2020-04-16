@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/styles/custom.dart';
 import 'package:toys/widgets/SectionTitle.dart';
 import 'package:toys/widgets/in_section_spacing.dart';

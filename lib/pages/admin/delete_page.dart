@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:toys/models/product.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/customLoading.dart';
 import 'package:toys/widgets/product_card.dart';

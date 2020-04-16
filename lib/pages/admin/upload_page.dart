@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/customLoading.dart';
 import 'package:toys/widgets/widget.dart';

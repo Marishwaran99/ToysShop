@@ -38,6 +38,8 @@ dependencies:
   multi_image_picker:
   file_picker:
   intl:
+  razorpay_flutter:
+  fluttertoast:
 
 dev_dependencies:
   flutter_test:

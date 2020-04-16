@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:toys/models/userModel.dart';
+import 'package:toys/models/user.dart';
 import 'package:toys/pages/view_image.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/customLoading.dart';
@@ -42,16 +42,7 @@ class _EditPageState extends State<EditPage> {
         .document(widget.details.uid)
         .get();
     // print(doc.data);
-    User details = new User(
-        doc.data['uid'],
-        doc.data['displayName'],
-        doc.data['email'],
-        doc.data['address'],
-        doc.data['city'],
-        doc.data['state'],
-        doc.data['photoUrl'],
-        doc.data['logintype'],
-        doc.data['role']);
+    User details = User.fromFirestore(doc);
     // print(details.username);
     setState(() {
       currentUser = details;
