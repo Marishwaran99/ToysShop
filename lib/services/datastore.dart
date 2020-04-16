@@ -15,10 +15,12 @@ abstract class BaseDatastore {
   Future<String> saveDeliveryLocation(
       String uid, Map<String, dynamic> deliveryAddress);
 
-  Future<String> addProduct(Map<String, dynamic> product);
+  Future<String> addProduct(String id, Map<String, dynamic> product);
   Future<String> addProductImage(File image, String id);
   Future<String> deleteProductImage(String id);
+  Future<String> deleteProduct(String id);
   Future<String> updateProduct(String id, Map<String, dynamic> product);
+  String getProductId();
   Stream<QuerySnapshot> getProducts();
 }
 
@@ -106,10 +108,10 @@ class Datastore implements BaseDatastore {
   }
 
   @override
-  Future<String> addProduct(Map<String, dynamic> product) async {
+  Future<String> addProduct(String id, Map<String, dynamic> product) async {
     String status = await _firestore
         .collection("products")
-        .document()
+        .document(id)
         .setData(product)
         .then((val) => 'success')
         .catchError((err) => err.toString());
@@ -141,6 +143,23 @@ class Datastore implements BaseDatastore {
         .collection("products")
         .document(id)
         .updateData(product)
+        .then((val) => 'success')
+        .catchError((err) => err.toString());
+    return status;
+  }
+
+  @override
+  String getProductId() {
+    String id = _firestore.collection("products").document().documentID;
+    return id;
+  }
+
+  @override
+  Future<String> deleteProduct(String id) async {
+    String status = await _firestore
+        .collection("products")
+        .document(id)
+        .delete()
         .then((val) => 'success')
         .catchError((err) => err.toString());
     return status;

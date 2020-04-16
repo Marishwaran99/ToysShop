@@ -42,8 +42,8 @@ class _ViewAllProductPageState extends State<ViewAllProductPage> {
                       snapshot.data.documents[i].data;
                   List<Map<String, dynamic>> previewImages =
                       productMap['previewImages'].cast<Map<String, dynamic>>();
-                  log(productMap["previewImages"].toString());
                   Product _product = Product(
+                      productId: productMap["productId"],
                       title: productMap["title"],
                       description: productMap["description"],
                       price: productMap["price"],
@@ -139,17 +139,31 @@ class _ProductCardState extends State<ProductCard> {
                     InSectionSpacing(),
                     Text('₹ ' + widget.product.price.toString(),
                         style: Custom().bodyTextStyle),
-                    IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (BuildContext ctx) {
-                            return AddProductPage(
-                              datastore: widget.datastore,
-                              product: widget.product,
-                            );
-                          }));
-                        })
+                    Row(
+                      children: <Widget>[
+                        IconButton(
+                            icon: Icon(Icons.edit),
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (BuildContext ctx) {
+                                return AddProductPage(
+                                  datastore: widget.datastore,
+                                  product: widget.product,
+                                );
+                              }));
+                            }),
+                        IconButton(
+                            icon: Icon(Icons.delete, color: Colors.grey),
+                            onPressed: () async {
+                              log('delete');
+                              log(widget.product.productId);
+                              String status = await widget.datastore
+                                  .deleteProduct(widget.product.productId);
+
+                              log(status);
+                            }),
+                      ],
+                    )
                   ])
             ],
           )),

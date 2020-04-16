@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
@@ -64,6 +65,7 @@ class _AddProductPageState extends State<AddProductPage> {
       },
     ];
     if (widget.product != null) {
+      log(widget.product.productId);
       _productTitleController.text = widget.product.title;
       _productDescriptionController.text = widget.product.description;
       _productPriceController.text = widget.product.price.toString();
@@ -108,16 +110,33 @@ class _AddProductPageState extends State<AddProductPage> {
         price != null &&
         discount != null &&
         stock != null) {
-      Map<String, dynamic> product = {
-        "title": title,
-        "description": description,
-        "price": price,
-        "discount": discount,
-        "stock": stock,
-        "thumbImage": _thumbnailImageDownloadUrl,
-        "previewImages": _previewImagesDownloadUrl
-      };
-      widget.datastore.addProduct(product);
+      if (widget.product.productId != null) {
+        log('hello');
+        Map<String, dynamic> product = {
+          "productId": widget.product.productId,
+          "title": title,
+          "description": description,
+          "price": price,
+          "discount": discount,
+          "stock": stock,
+          "thumbImage": _thumbnailImageDownloadUrl,
+          "previewImages": _previewImagesDownloadUrl
+        };
+        widget.datastore.updateProduct(widget.product.productId, product);
+      } else {
+        String id = widget.datastore.getProductId();
+        Map<String, dynamic> product = {
+          "productId": id,
+          "title": title,
+          "description": description,
+          "price": price,
+          "discount": discount,
+          "stock": stock,
+          "thumbImage": _thumbnailImageDownloadUrl,
+          "previewImages": _previewImagesDownloadUrl
+        };
+        widget.datastore.addProduct(id, product);
+      }
       log('saved');
     }
     log('saving cancel');
@@ -220,8 +239,7 @@ class _AddProductPageState extends State<AddProductPage> {
             SectionSpacing(),
             Opacity(
                 opacity: _saving ? 0.25 : 1,
-                child: PrimaryButton('Save', () {
-                  log('saving');
+                child: PrimaryButton(_saving ? 'Saving..' : 'Save', () {
                   if (!_saving) saveProduct();
                 })),
             _saving ? CircularProgressIndicator() : Container()
@@ -232,86 +250,80 @@ class _AddProductPageState extends State<AddProductPage> {
   }
 
   Widget _choosePreviewImage() {
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: <
+        Widget>[
+      Text(
+        'Choose Preview Image *',
+        style: Custom().inputLabelTextStyle,
+      ),
+      SizedBox(height: 4),
+      GestureDetector(
+        onTap: () {
+          getImageForPreview();
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: 36,
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+              color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+          child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text('Choose Image', style: Custom().hintTextStyle)),
+        ),
+      ),
+      SizedBox(
+        height: 8,
+      ),
+      Row(
         children: <Widget>[
-          Text(
-            'Choose Preview Image *',
-            style: Custom().inputLabelTextStyle,
-          ),
-          SizedBox(height: 4),
-          GestureDetector(
-            onTap: () {
-              getImageForPreview();
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: 36,
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(8)),
-              child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Choose Image', style: Custom().hintTextStyle)),
-            ),
-          ),
-          SizedBox(
-            height: 8,
-          ),
-          Row(
-            children: <Widget>[
-              _previewImagesDownloadUrl.length > 0
-                  ? Row(
-                      children: _previewImagesDownloadUrl.map((p) {
-                        int idx = _previewImagesDownloadUrl.indexOf(p);
-                        return _previewImageLoading
-                            ? CircularProgressIndicator()
-                            : Stack(children: [
-                                Container(
-                                  width: 100,
-                                  height: 100,
+          _previewImagesDownloadUrl.length > 0
+              ? Row(
+                  children: _previewImagesDownloadUrl.map((p) {
+                    int idx = _previewImagesDownloadUrl.indexOf(p);
+                    return Stack(children: [
+                      Container(
+                        child: _previewImageLoading
+                            ? Center(child: CircularProgressIndicator())
+                            : Container(),
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: NetworkImage(p['image']))),
+                      ),
+                      Container(
+                        width: 100,
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: GestureDetector(
+                              onTap: () async {
+                                String status = await widget.datastore
+                                    .deleteProductImage(
+                                        _previewImagesDownloadUrl[idx]['id']);
+                                if (status == 'success') {
+                                  _previewImagesDownloadUrl.removeAt(idx);
+                                }
+                                setState(() {});
+                              },
+                              child: Container(
+                                  margin: EdgeInsets.only(right: 4, top: 4),
+                                  width: 36,
+                                  height: 36,
                                   decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                          fit: BoxFit.cover,
-                                          image: NetworkImage(p['image']))),
-                                ),
-                                Container(
-                                  width: 100,
-                                  child: Align(
-                                    alignment: Alignment.topRight,
-                                    child: GestureDetector(
-                                        onTap: () async {
-                                          String status = await widget.datastore
-                                              .deleteProductImage(
-                                                  _previewImagesDownloadUrl[idx]
-                                                      ['id']);
-                                          if (status == 'success') {
-                                            _previewImagesDownloadUrl
-                                                .removeAt(idx);
-                                          }
-                                          setState(() {});
-                                        },
-                                        child: Container(
-                                            margin: EdgeInsets.only(
-                                                right: 4, top: 4),
-                                            width: 36,
-                                            height: 36,
-                                            decoration: BoxDecoration(
-                                                color: Colors.red[200]
-                                                    .withOpacity(0.6),
-                                                borderRadius:
-                                                    BorderRadius.circular(36)),
-                                            child: Icon(Icons.close))),
-                                  ),
-                                )
-                              ]);
-                      }).toList(),
-                    )
-                  : Container(),
-            ],
-          ),
-        ]);
+                                      color: Colors.red[200].withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(36)),
+                                  child: Icon(Icons.close))),
+                        ),
+                      )
+                    ]);
+                  }).toList(),
+                )
+              : Container(),
+        ],
+      ),
+    ]);
   }
 
   Widget _chooseImage() {
