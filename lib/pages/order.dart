@@ -48,7 +48,7 @@ class _OrderState extends State<Order> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: MyAppBar(text: 'Toys',back: true,),
       body: SingleChildScrollView(
           child: Center(
         child: _orderList.length == 0

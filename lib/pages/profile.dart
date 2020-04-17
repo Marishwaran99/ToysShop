@@ -12,6 +12,8 @@ import 'package:toys/pages/edit_page.dart';
 import 'package:toys/pages/forget_password.dart';
 import 'package:toys/pages/order.dart';
 import 'package:toys/pages/view_image.dart';
+import 'package:toys/services/auth.dart';
+import 'package:toys/styles/custom.dart';
 import 'package:toys/widgets/customLoading.dart';
 import 'package:toys/widgets/widget.dart';
 
@@ -21,7 +23,8 @@ final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
 class LoginPage extends StatefulWidget {
   User details;
-  LoginPage({Key key, this.details}) : super(key: key);
+  final VoidCallback logoutCallback;
+  LoginPage({Key key, this.details, this.logoutCallback}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -94,80 +97,114 @@ class _LoginPageState extends State<LoginPage> {
 
   //Username TextField
   Widget _buildUsername() {
-    return TextFormField(
-      controller: userNameController,
-      decoration: InputDecoration(
-          labelText: 'Username',
-          icon: Icon(
-            FontAwesome.user,
-            size: 18,
-          )),
-      validator: (String value) {
-        if (value.isEmpty) {
-          return 'Username is Required';
-        }
-        return null;
-      },
-      onSaved: (String value) {
-        _username = value;
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          "Username",
+          style: Custom().inputLabelTextStyle,
+        ),
+        SizedBox(height: 4),
+        Container(
+          height: 48,
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+              color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+          child: TextFormField(
+            maxLines: 1,
+            style: Custom().inputTextStyle,
+            keyboardType: TextInputType.emailAddress,
+            decoration:
+                InputDecoration(border: InputBorder.none, hintText: 'yourname'),
+            controller: userNameController,
+            validator: (value) =>
+                value.isEmpty ? 'Username can\'t be empty' : null,
+            onSaved: (value) => _username = value.trim(),
+          ),
+        )
+      ],
     );
   }
 
   //Email TextField
   Widget _buildEmail() {
-    return TextFormField(
-      controller: emailController,
-      decoration: InputDecoration(
-          labelText: 'Email Address',
-          icon: Icon(
-            Icons.email,
-            size: 18,
-          )),
-      validator: (String value) {
-        if (value.isEmpty) {
-          return 'Email is Required';
-        }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          "Email Address",
+          style: Custom().inputLabelTextStyle,
+        ),
+        SizedBox(height: 4),
+        Container(
+          height: 48,
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+              color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+          child: TextFormField(
+            controller: emailController,
+            maxLines: 1,
+            style: Custom().inputTextStyle,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecoration(
+                border: InputBorder.none, hintText: 'you@gmail.com'),
+            validator: (String value) {
+              if (value.isEmpty) {
+                return 'Email is Required';
+              }
 
-        if (!RegExp(
-                r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
-            .hasMatch(value)) {
-          return 'Please enter a valid email Address';
-        }
+              if (!RegExp(
+                      r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?")
+                  .hasMatch(value)) {
+                return 'Please enter a valid email Address';
+              }
 
-        return null;
-      },
-      onSaved: (String value) {
-        _email = value;
-      },
+              return null;
+            },
+            onSaved: (String value) {
+              _email = value;
+            },
+          ),
+        ),
+      ],
     );
   }
 
   //Password TextField
   Widget _buildPassword() {
-    return TextFormField(
-      controller: passwordController,
-      decoration: InputDecoration(
-          labelText: 'Password',
-          icon: Icon(
-            Ionicons.ios_lock,
-            size: 18,
-          )),
-      keyboardType: TextInputType.visiblePassword,
-      validator: (String value) {
-        if (value.isEmpty) {
-          return 'Password is Required';
-        }
-        if (value.length < 6) {
-          return 'Your password needs to be atleast 6 character';
-        }
-
-        return null;
-      },
-      onSaved: (String value) {
-        _password = value;
-      },
-      obscureText: true,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          "Password",
+          style: Custom().inputLabelTextStyle,
+        ),
+        SizedBox(height: 4),
+        Container(
+          height: 48,
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+              color: Colors.grey[200], borderRadius: BorderRadius.circular(8)),
+          child: TextFormField(
+            keyboardType: TextInputType.visiblePassword,
+            style: Custom().inputTextStyle,
+            obscureText: true,
+            maxLines: 1,
+            decoration: InputDecoration(
+                border: InputBorder.none, hintText: 'your password'),
+            controller: passwordController,
+            validator: (value) {
+              if (value.isEmpty)
+                return 'Passwords can\'t be empty';
+              else if (value.length < 6)
+                return 'Passwords should be atleast 6 characters';
+              else
+                return null;
+            },
+            onSaved: (value) => _password = value.trim(),
+          ),
+        )
+      ],
     );
   }
 
@@ -471,7 +508,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   children: <Widget>[
                     _buildUsername(),
+                    SizedBox(height: 10),
                     _buildEmail(),
+                    SizedBox(height: 10),
                     _buildPassword(),
                     SizedBox(height: 20),
                     RaisedButton(
@@ -587,7 +626,7 @@ class _LoginPageState extends State<LoginPage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => MyHomePage(
-                              details: widget.details,
+                              currentUser: widget.details,
                             )));
               },
             ),
@@ -604,26 +643,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   //Logout Function
-  _logout() {
-    print(currentUser.loginType);
+  _logout() async {
+    // print(currentUser.loginType);
     currentUser.loginType == "google"
-        ? _googleSignIn
-            .signOut()
-            .then((onValue) => print("Successfull"))
-            .catchError((onError) => print(onError.message))
-        : FirebaseAuth.instance.signOut().then((result) {
-            // Sign-out successful.
-            print('Signout succesfull!');
-          }).catchError((error) {
-            // An error happened
-            print(error.message);
-          });
-    // _googleSignIn.signOut();
+        ? Auth().googleSignIn()
+        : await Auth().signOut();
     setState(() {
       isAuth = false;
       widget.details = null;
       currentUser = null;
     });
+    widget.logoutCallback();
   }
 
   //Logging in
@@ -632,27 +662,13 @@ class _LoginPageState extends State<LoginPage> {
     if (formState.validate()) {
       formState.save();
       try {
-        AuthResult userDetails = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: _email, password: _password);
-        print("Email:${userDetails.user.email}");
+        User user = await Auth().signIn(_email, _password);
 
-        DocumentSnapshot doc = await Firestore.instance
-            .collection('users')
-            .document(userDetails.user.uid)
-            .get();
-
-        User details = User.fromFirestore(doc);
-
-        print("Username:" + details.username);
-
-        setState(() {
-          isAuth = true;
-        });
         Navigator.push(
             context,
             MaterialPageRoute(
                 builder: (context) => MyHomePage(
-                      details: details,
+                      currentUser: user,
                     )));
       } catch (error) {
         switch (error.code) {
@@ -694,32 +710,11 @@ class _LoginPageState extends State<LoginPage> {
     if (formState.validate()) {
       formState.save();
       try {
-        FirebaseAuth.instance
-            .createUserWithEmailAndPassword(email: _email, password: _password)
-            .then((currentUser) => Firestore.instance
-                    .collection("users")
-                    .document(currentUser.user.uid)
-                    .setData({
-                  "uid": currentUser.user.uid,
-                  "displayName": userNameController.text,
-                  "email": emailController.text,
-                  "photoUrl": "",
-                  "address": "",
-                  "city": "",
-                  "state": "",
-                  "pincode": "",
-                  "logintype": "signup",
-                  "role": "user"
-                }))
-            .then((result) => {
-                  emailController.clear(),
-                  passwordController.clear(),
-                  userNameController.clear(),
-                })
-            .catchError((onError) => print(onError))
-            .catchError((onError) => print(onError));
-
+        Auth().signUp(_email, _password, userNameController.text);
         setState(() {
+          userNameController.clear();
+          emailController.clear();
+          passwordController.clear();
           isNew = false;
         });
       } catch (e) {
@@ -730,73 +725,14 @@ class _LoginPageState extends State<LoginPage> {
 
   //Google Login
   Future<void> _googleLogin(BuildContext context) async {
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
-
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    AuthResult userDetails =
-        await _firebaseAuth.signInWithCredential(credential);
-
-    DocumentSnapshot doc = await Firestore.instance
-        .collection("users")
-        .document(userDetails.user.uid)
-        .get();
-
-    if (!doc.exists) {
-      Firestore.instance
-          .collection("users")
-          .document(userDetails.user.uid)
-          .setData({
-        "uid": userDetails.user.uid,
-        "displayName": userDetails.user.displayName,
-        "email": userDetails.user.email,
-        "photoUrl": userDetails.user.photoUrl,
-        "address": "",
-        "city": "",
-        "state": "",
-        "loginType": "google",
-        "role": "user"
-      }).catchError((onError) => print(onError));
-      DocumentSnapshot doc = await Firestore.instance
-          .collection("users")
-          .document(userDetails.user.uid)
-          .get();
-      User details = User.fromFirestore(doc);
-
-      setState(() {
-        isAuth = true;
-        authResult = userDetails;
-      });
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MyHomePage(
-                    details: details,
-                  )));
-    } else {
-      DocumentSnapshot doc = await Firestore.instance
-          .collection("users")
-          .document(userDetails.user.uid)
-          .get();
-
-      User details = User.fromFirestore(doc);
-
-      setState(() {
-        isAuth = true;
-        authResult = userDetails;
-      });
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MyHomePage(
-                    details: details,
-                  )));
-    }
+    User user = await Auth().googleSignIn();
+    print(user.uid);
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => MyHomePage(
+                  currentUser: user,
+                )));
   }
 }
 

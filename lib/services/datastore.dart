@@ -3,17 +3,20 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:toys/models/product.dart';
 import 'package:toys/models/user.dart';
 
 abstract class BaseDatastore {
   Future<String> addUserData(User user);
   Future<Map<String, dynamic>> getUserData(String uid);
   Future<String> updateUserData(String uid, String name);
+  Future<String> updateUserLocation(
+      String uid, String address, String city, String state, String pincode);
   Future<String> addProductToCart(String uid, Map<String, dynamic> productId);
   Future<String> storeProfilePic(String uid, File image);
   Future<String> saveDeliveryLocation(
       String uid, Map<String, dynamic> deliveryAddress);
-
+  getWishList(User currentUser, ProductList p);
   Future<String> addProduct(Map<String, dynamic> product);
   Future<String> addProductImage(File image, String id);
   Future<String> deleteProductImage(String id);
@@ -32,6 +35,10 @@ class Datastore implements BaseDatastore {
         .setData(user.toMap())
         .then((val) => 'success')
         .catchError((onError) => onError.toString());
+    await _firestore
+        .collection('wishlists')
+        .document(user.uid)
+        .setData({'productIds': []});
     return status;
   }
 
@@ -43,6 +50,29 @@ class Datastore implements BaseDatastore {
         .updateData({'name': name})
         .then((val) => 'success')
         .catchError((onError) => onError.toString());
+    return status;
+  }
+
+  Future<String> updateUserLocation(String uid, String address, String city,
+      String state, String pincode) async {
+    // String status = await _firestore
+    //     .collection('users')
+    //     .document(uid)
+    //     .updateData({'deliveryAddress': {'address': address, 'city': city, 'state': state,'pincode': pincode }})
+    //     .then((val) => 'success')
+    //     .catchError((onError) => onError.toString());
+    String status = await _firestore
+        .collection('users')
+        .document(uid)
+        .updateData({
+          'address': address,
+          'city': city,
+          'state': state,
+          'pincode': pincode
+        })
+        .then((val) => 'success')
+        .catchError((onError) => onError.toString());
+
     return status;
   }
 
@@ -122,6 +152,33 @@ class Datastore implements BaseDatastore {
     Stream<QuerySnapshot> querySnapshot =
         _firestore.collection("products").snapshots();
     return querySnapshot;
+  }
+
+  @override
+  getWishList(User currentUser, ProductList p) async {
+    List _wishListProductIds = List();
+    bool fav;
+
+    DocumentSnapshot snapshot = await Firestore.instance
+        .collection('wishlists')
+        .document(currentUser.uid)
+        .get();
+
+    for (var name in snapshot.data['productIds']) {
+      _wishListProductIds.add(name);
+    }
+    print(_wishListProductIds);
+    for (var productId in _wishListProductIds) {
+      if (productId.toString() == p.id.toString()) {
+        fav = true;
+        // print(fav);
+      } else {
+        fav = false;
+        // print(fav);
+      }
+    }
+
+    return fav;
   }
 
   @override

@@ -114,7 +114,7 @@ class _ProductCardState extends State<ProductCard> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => MyHomePage(
-                                  details: widget.currentUser,
+                                  currentUser: widget.currentUser,
                                 )));
                   },
                 ),

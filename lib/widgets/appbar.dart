@@ -9,19 +9,21 @@ import 'package:toys/styles/custom.dart';
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Custom custom = Custom();
   final bool back;
-  MyAppBar({this.back});
+  final String text ;
+  MyAppBar({this.back, this.text});
   @override
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(
-        "TOYS",
+        text,
         style: TextStyle(
             color: Theme.of(context).primaryColor,
             letterSpacing: 2,
             fontSize: 24),
       ),
       elevation: 0,
-      leading: InkWell(
+      automaticallyImplyLeading: back ? true : false,
+      leading: back ? InkWell(
         onTap: () {
           Navigator.pop(context);
         },
@@ -29,7 +31,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           Ionicons.ios_arrow_back,
           color: Theme.of(context).primaryColor,
         ),
-      ),
+      ): null,
       backgroundColor: Colors.white,
       actions: <Widget>[
         GestureDetector(

@@ -94,7 +94,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          MyHomePage(details: widget.currentUser)));
+                          MyHomePage(currentUser: widget.currentUser)));
             },
           )
         : _CartCount != 0
@@ -155,7 +155,7 @@ class _AddToCartPageState extends State<AddToCartPage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => MyHomePage(
-                                    details: widget.currentUser,
+                                    currentUser: widget.currentUser,
                                   )));
                     })
                   ],

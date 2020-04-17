@@ -18,7 +18,7 @@ class _DeletePageState extends State<DeletePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: MyAppBar(text: 'Toys', back: true,),
       body: StreamBuilder(
           stream: Firestore.instance
               .collection('products')

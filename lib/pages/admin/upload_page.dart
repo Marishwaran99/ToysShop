@@ -218,7 +218,7 @@ class _UploadPageState extends State<UploadPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: MyAppBar(text: 'Toys', back: true,),
       body: isLoading
           ? circularProgress(context)
           : Center(

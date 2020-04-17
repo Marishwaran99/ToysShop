@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/models/user.dart';
@@ -6,11 +7,12 @@ import 'package:toys/pages/add_to_cart_page.dart';
 import 'package:toys/pages/home_page.dart';
 import 'package:toys/pages/product_page.dart';
 import 'package:toys/pages/profile.dart';
+import 'package:toys/services/auth.dart';
+import 'package:toys/widgets/appbar.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,8 +41,8 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  User details;
-  MyHomePage({Key key, this.title, this.details}) : super(key: key);
+  User currentUser;
+  MyHomePage({Key key, this.title, this.currentUser}) : super(key: key);
 
   final String title;
 
@@ -49,16 +51,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  User currentUser;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _cartCount = '0';
   int _currentIndex = 0;
   getCartCount() async {
     QuerySnapshot doc = await Firestore.instance
         .collection('carts')
-        .where('userId', isEqualTo: widget.details.uid)
+        .where('userId', isEqualTo: currentUser.uid)
         .getDocuments();
     setState(() {
       _cartCount = doc.documents.length.toString();
+    });
+  }
+
+  void loginCallback() {
+    Auth().getCurrentUser().then((user) {
+      setState(() {
+        user = user;
+      });
+    });
+    // setState(() {
+    //   _authStatus = AuthStatus.LOGGED_IN;
+    // });
+  }
+
+  void logoutCallback() {
+    setState(() {
+      // _authStatus = AuthStatus.NOT_LOGGED_IN;
+      // _userId = '';
+      _currentIndex = 3;
+      widget.currentUser = null;
     });
   }
 
@@ -68,69 +91,59 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  setCurrentIndex() {
-    if (widget.details == null) {
+  getCurrentUserInfo() async {
+    if (widget.currentUser != null) {
+      DocumentSnapshot doc = await Firestore.instance
+          .collection('users')
+          .document(widget.currentUser.uid)
+          .get();
+      User details = User.fromFirestore(doc);
       setState(() {
-        _currentIndex = 3;
-      });
-    } else {
-      setState(() {
+        currentUser = details;
         _currentIndex = 0;
       });
+      QuerySnapshot docs = await Firestore.instance
+          .collection('carts')
+          .where('userId', isEqualTo: currentUser.uid)
+          .getDocuments();
+      setState(() {
+        _cartCount = docs.documents.length.toString();
+      });
+    } else {
+      _currentIndex = 3;
     }
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCartCount();
-    setCurrentIndex();
+    getCurrentUserInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       HomePage(
-        details: widget.details,
+        details: currentUser,
       ),
       ProductPage(
-        currentUser: widget.details,
+        currentUser: currentUser,
       ),
       AddToCartPage(
-        currentUser: widget.details,
+        currentUser: currentUser,
       ),
       LoginPage(
-        details: widget.details,
+        details: currentUser,
+        logoutCallback: logoutCallback,
       )
     ];
 
     return Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(
-            "TOYS",
-            style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                letterSpacing: 2,
-                fontSize: 24),
-          ),
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          actions: <Widget>[
-            GestureDetector(
-              child: Icon(
-                Ionicons.ios_search,
-                color: Theme.of(context).primaryColor,
-              ),
-              onTap: () {
-                print(widget.details.uid);
-                getCartCount();
-                print('search');
-              },
-            )
-          ],
+        appBar: MyAppBar(
+          text: "Toys",
+          back: false,
         ),
         body: _children[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
@@ -213,230 +226,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-// leading: widget.details != null
-//     ? GestureDetector(
-//         child: Padding(
-//           padding:
-//               const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: <Widget>[
-//               Container(
-//                   width: 26,
-//                   decoration: new BoxDecoration(
-//                     border: Border(
-//                       top: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       left: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       right: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       bottom: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                     ),
-//                   )),
-//               SizedBox(height: 4),
-//               Container(
-//                   alignment: Alignment.topLeft,
-//                   width: 20,
-//                   decoration: new BoxDecoration(
-//                     border: Border(
-//                       top: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       left: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       right: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       bottom: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                     ),
-//                   )),
-//               SizedBox(height: 4),
-//               Container(
-//                   width: 26,
-//                   decoration: new BoxDecoration(
-//                     border: Border(
-//                       top: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       left: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       right: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                       bottom: BorderSide(
-//                           width: 1.2,
-//                           color: Theme.of(context).primaryColor),
-//                     ),
-//                   )),
-//               SizedBox(height: 4),
-//             ],
-//           ),
-//         ),
-//         onTap: () {
-//           _scaffoldKey.currentState.openDrawer();
-//         },
-//       )
-//     : null,
-
-// drawer: widget.details != null
-//     ? SizedBox(
-//         width: MediaQuery.of(context).size.width * 0.75,
-//         child: Drawer(
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: <Widget>[
-//               UserAccountsDrawerHeader(
-//                   decoration: BoxDecoration(color: Color(0xffECECEC)),
-//                   accountName: Text(
-//                     widget.details.userName,
-//                     style: TextStyle(
-//                         color: Theme.of(context).primaryColor,
-//                         fontWeight: FontWeight.bold),
-//                   ),
-//                   accountEmail: Text(
-//                     widget.details.userEmail,
-//                     style: TextStyle(
-//                         color: Theme.of(context).primaryColor,
-//                         fontWeight: FontWeight.bold),
-//                   ),
-//                   currentAccountPicture: CircleAvatar(
-//                     backgroundImage: CachedNetworkImageProvider(
-//                         widget.details.photoUrl),
-//                   )),
-//               Padding(
-//                 padding: const EdgeInsets.symmetric(
-//                     horizontal: 10, vertical: 5),
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: <Widget>[
-//                     GestureDetector(
-//                         child: Container(
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(8.0),
-//                         child: Row(
-//                           children: <Widget>[
-//                             Icon(
-//                               FontAwesome.list_alt,
-//                               size: 18,
-//                             ),
-//                             SizedBox(width: 10),
-//                             Text(
-//                               "My Orders",
-//                               style: Theme.of(context).textTheme.title,
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     )),
-//                     Divider(
-//                       height: 15,
-//                     ),
-//                     GestureDetector(
-//                         child: Container(
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(8.0),
-//                         child: Row(
-//                           children: <Widget>[
-//                             Icon(
-//                               FontAwesome.edit,
-//                               size: 18,
-//                             ),
-//                             SizedBox(width: 10),
-//                             Text(
-//                               "Edit Account",
-//                               style: Theme.of(context).textTheme.title,
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     )),
-//                     Divider(
-//                       height: 15,
-//                     ),
-//                     GestureDetector(
-//                         child: Container(
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(8.0),
-//                         child: Row(
-//                           children: <Widget>[
-//                             Icon(
-//                               Ionicons.ios_lock,
-//                               size: 18,
-//                             ),
-//                             SizedBox(width: 10),
-//                             Text(
-//                               "Change Password",
-//                               style: Theme.of(context).textTheme.title,
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     )),
-//                     Divider(
-//                       height: 15,
-//                     ),
-//                     GestureDetector(
-//                         child: Container(
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(8.0),
-//                         child: Row(
-//                           children: <Widget>[
-//                             Icon(
-//                               Ionicons.md_remove_circle,
-//                               size: 18,
-//                             ),
-//                             SizedBox(width: 10),
-//                             Text(
-//                               "Delete Account",
-//                               style: Theme.of(context).textTheme.title,
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     )),
-//                     Divider(
-//                       height: 15,
-//                     ),
-//                     GestureDetector(
-//                         child: Container(
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(8.0),
-//                         child: Row(
-//                           children: <Widget>[
-//                             Icon(
-//                               FontAwesome.sign_out,
-//                               size: 18,
-//                             ),
-//                             SizedBox(width: 10),
-//                             Text(
-//                               "Logout",
-//                               style: Theme.of(context).textTheme.title,
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     )),
-//                     Divider(
-//                       height: 15,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       )
-//     : null,

@@ -10,10 +10,10 @@ class User {
       role,
       address,
       city,
-      state;
-  int pincode;
-  List<String> cartProducts;
-  List<String> boughtProducts;
+      state, pincode;
+  Map<String, dynamic> deliveryAddress;
+  List<dynamic> cartProducts;
+  List<dynamic> boughtProducts;
   List<Review> reviews;
 
   User(
@@ -29,58 +29,54 @@ class User {
       this.role,
       this.boughtProducts,
       this.cartProducts,
-      this.reviews});
+      this.reviews, this.deliveryAddress});
   Map<String, dynamic> toMap() {
     return {
       'uid': uid ?? '',
       'username': username ?? '',
       'userEmail': userEmail ?? '',
       'photoUrl': photoUrl ?? '',
-      'address': address,
-      'pincode': '',
-      'state': state,
-      'city': city,
-      'cartProducts': cartProducts ?? [],
+      'deliveryAddress': deliveryAddress ??
+          {'address': '', 'pincode': '', 'state': '', 'city': ''},
+      'cartProducts': cartProducts ,
       'role': 'user',
-      'review': reviews ?? [],
-      'boughtProducts': boughtProducts ?? [],
-      'loginType': ''
+      'reviews': reviews ,
+      'boughtProducts': boughtProducts ,
+      'loginType': loginType
     };
   }
 
   factory User.fromMap(Map snapshot) {
-    snapshot = snapshot ?? {};
     return User(
-        photoUrl: snapshot['photoUrl'],
-        username: snapshot["username"],
-        userEmail: snapshot["email"],
-        role: snapshot['role'],
-        address: snapshot['address'],
-        state: snapshot['state'],
-        city: snapshot['city'],
-        cartProducts: snapshot["cartProducts"],
-        boughtProducts: snapshot["boughtProducts"],
-        reviews: snapshot["reviews"],
-        loginType: snapshot['loginType'],
-        uid: snapshot['uid'],
-        pincode: snapshot['pincode']);
+      photoUrl: snapshot['photoUrl'],
+      username: snapshot["username"],
+      userEmail: snapshot["userEmail"],
+      role: snapshot['role'],
+      deliveryAddress: snapshot["deliveryAddress"],
+      cartProducts: snapshot["cartProducts"],
+      boughtProducts: snapshot["boughtProducts"],
+      reviews: snapshot["reviews"],
+      loginType: snapshot['loginType'],
+      uid: snapshot['uid'],
+    );
   }
 
   factory User.fromFirestore(DocumentSnapshot doc) {
-    Map snapshot = doc.data;
+
     return User(
-        photoUrl: snapshot['photoUrl'],
-        username: snapshot["displayName"],
-        userEmail: snapshot["email"],
-        role: snapshot['role'],
-        address: snapshot['address'],
-        state: snapshot['state'],
-        city: snapshot['city'],
-        cartProducts: snapshot["cartProducts"],
-        boughtProducts: snapshot["boughtProducts"],
-        reviews: snapshot["reviews"],
-        loginType: snapshot['loginType'],
-        uid: snapshot['uid'],
-        pincode: snapshot['pincode']);
+      uid: doc.data['uid'],
+      photoUrl: doc.data['photoUrl'],
+      username: doc.data["username"],
+      userEmail: doc.data["userEmail"],
+      role: doc.data['role'],
+      address: doc.data['address'],
+      city: doc.data['city'],
+      state: doc.data['state'],
+      pincode: doc.data['pincode'],
+      cartProducts: doc.data["cartProducts"],
+      boughtProducts: doc.data["boughtProducts"],
+      reviews: doc.data["reviews"],
+      loginType: doc.data['loginType'],
+    );
   }
 }

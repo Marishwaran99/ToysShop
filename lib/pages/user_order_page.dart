@@ -81,7 +81,7 @@ class User_OrderPageState extends State<UserOrderPage> {
       elevation: 0,
       leading: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: widget.currentUser,)));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(currentUser: widget.currentUser,)));
         },
         child: Icon(
           Ionicons.ios_arrow_back,
@@ -222,7 +222,7 @@ class User_OrderPageState extends State<UserOrderPage> {
                   ),
                 ),
               ),
-              buildRaisedButton("Ok", Theme.of(context).primaryColor, Colors.white, (){Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(details: widget.currentUser,)));})
+              buildRaisedButton("Ok", Theme.of(context).primaryColor, Colors.white, (){Navigator.push(context, MaterialPageRoute(builder: (context) => MyHomePage(currentUser: widget.currentUser,)));})
             ],
           ),
         ),

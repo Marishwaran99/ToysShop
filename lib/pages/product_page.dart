@@ -5,6 +5,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
 import 'package:toys/models/user.dart';
+import 'package:toys/services/auth.dart';
+import 'package:toys/services/datastore.dart';
 import 'package:toys/styles/custom.dart';
 import 'package:toys/widgets/SectionTitle.dart';
 import 'package:toys/widgets/in_section_spacing.dart';
@@ -95,6 +97,111 @@ class _ProductPageState extends State<ProductPage> {
   TextEditingController _searchController = TextEditingController();
   var filters = ['Price: Low to High', 'Price: High to Low'];
   Custom custom = Custom();
+  handleCart(ProductList product, BuildContext context) async {
+    try {
+      QuerySnapshot doc =
+          await Firestore.instance.collection('carts').getDocuments();
+      print(doc.documents.length);
+      bool isInCart = false;
+      print(doc.documents.map((f) {
+        if (f.data['productId'] == product.id &&
+            f.data['userId'] == widget.currentUser.uid) {
+          isInCart = true;
+        } else {
+          isInCart = false;
+        }
+      }));
+      if (!isInCart) {
+        var id = new DateTime.now().millisecondsSinceEpoch;
+        await Firestore.instance
+            .collection('carts')
+            .document(id.toString())
+            .setData({
+          "cartId": id,
+          "productId": product.id,
+          "quantity": 1,
+          "productName": product.title,
+          "thumbnailImage": product.thumbnailImage,
+          "discount": product.discount,
+          "price": product.price,
+          "userId": widget.currentUser.uid,
+          "timestamp": DateTime.now(),
+        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Success",
+                  style: TextStyle(
+                    color: Colors.green,
+                  )),
+              content: Text("Product Added to cart"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Ok", style: TextStyle(color: Colors.black)),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                                  currentUser: widget.currentUser,
+                                )));
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        buildErrorDialog("Product Already in Cart!", context);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  handleAddToWishlist(String productId, bool fav) async {
+    List productIds = List();
+    productIds.add(productId);
+    if (fav) {
+      await Firestore.instance
+          .collection('wishlists')
+          .document(widget.currentUser.uid)
+          .updateData({'productIds': FieldValue.arrayUnion(productIds)});
+    } else if (!fav) {
+      await Firestore.instance
+          .collection('wishlists')
+          .document(widget.currentUser.uid)
+          .updateData({'productIds': FieldValue.arrayRemove(productIds)});
+    }
+  }
+
+  Future<bool> isInWishlist(ProductList p) async {
+    List _wishListProductIds = List();
+    bool fav;
+
+    DocumentSnapshot snapshot = await Firestore.instance
+        .collection('wishlists')
+        .document(widget.currentUser.uid)
+        .get();
+
+    for (var name in snapshot.data['productIds']) {
+      _wishListProductIds.add(name);
+    }
+    print(_wishListProductIds);
+    for (var productId in _wishListProductIds) {
+      if (productId.toString() == p.id.toString()) {
+        fav = true;
+        // print(fav);
+      } else {
+        fav = false;
+        // print(fav);
+      }
+    }
+
+    return fav;
+  }
+
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
@@ -160,91 +267,26 @@ class _ProductPageState extends State<ProductPage> {
             InSectionSpacing(),
             Column(
                 children: _productsList.map((p) {
-              return BuildProductCard(
-                custom: custom,
-                p: p,
-                currentUser: widget.currentUser,
-              );
+              // var fav = isInWishlist(p);
+              bool _fav = true;
+              Datastore().getWishList(widget.currentUser, p).then((onValue){
+                print(onValue);
+                _fav = onValue;
+                // setState(() {
+                //   _fav = onValue;
+                // });
+              });
+              return BuildProductCard(p, custom, widget.currentUser, _fav);
             }).toList()),
           ],
         )),
       ),
     );
   }
-}
 
-class BuildProductCard extends StatelessWidget {
-  bool fav = false;
-  ProductList p;
-  User currentUser;
-  BuildProductCard({Key key, @required this.custom, this.p, this.currentUser})
-      : super(key: key);
-
-  final Custom custom;
-  handleCart(ProductList product, BuildContext context) async {
-    try {
-      QuerySnapshot doc =
-          await Firestore.instance.collection('carts').getDocuments();
-      print(doc.documents.length);
-      bool isInCart = false;
-      print(doc.documents.map((f) {
-        if (f.data['productId'] == product.id && f.data['userId'] == currentUser.uid) {
-          isInCart = true;
-        } else {
-          isInCart = false;
-        }
-      }));
-      if (!isInCart) {
-        var id = new DateTime.now().millisecondsSinceEpoch;
-        await Firestore.instance
-            .collection('carts')
-            .document(id.toString())
-            .setData({
-          "cartId": id,
-          "productId": p.id,
-          "quantity": 1,
-          "productName": p.title,
-          "thumbnailImage": p.thumbnailImage,
-          "discount": p.discount,
-          "price": p.price,
-          "userId": currentUser.uid,
-          "timestamp": DateTime.now(),
-        });
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("Success",
-                  style: TextStyle(
-                    color: Colors.green,
-                  )),
-              content: Text("Product Added to cart"),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Ok", style: TextStyle(color: Colors.black)),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MyHomePage(
-                                  details: currentUser,
-                                )));
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
-        buildErrorDialog("Product Already in Cart!", context);
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget BuildProductCard(
+      ProductList p, Custom custom, User currentUser, bool fav) {
+        // bool fav = false;
     return GestureDetector(
       onTap: () {},
       child: Padding(
@@ -300,7 +342,7 @@ class BuildProductCard extends StatelessWidget {
                         child: Text(
                           '${p.title}',
                           overflow: TextOverflow.fade,
-                          style: Theme.of(context).textTheme.headline,
+                          style: Theme.of(context).textTheme.subtitle,
                         ),
                       ),
                       Text(
@@ -352,6 +394,8 @@ class BuildProductCard extends StatelessWidget {
                                             ),
                                       onPressed: () {
                                         fav = !fav;
+                                        handleAddToWishlist(
+                                            p.id.toString(), fav);
                                         print(fav);
                                       }),
                                 )
@@ -371,30 +415,245 @@ class BuildProductCard extends StatelessWidget {
     );
   }
 }
-// Padding(
-//                     padding: const EdgeInsets.only(top: 5),
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: <Widget>[
-//                         Padding(
-//                           padding: const EdgeInsets.only(right: 10),
-//                           child: IconButton(
-//                               icon: fav
-//                                   ? Icon(
-//                                       FontAwesome.heart,
-//                                       size: 15,
-//                                       color: Colors.red,
-//                                     )
-//                                   : Icon(
-//                                       FontAwesome.heart_o,
-//                                       size: 15,
-//                                       color: Colors.red,
-//                                     ),
-//                               onPressed: () {
-//                                 fav = !fav;
-//                                 print(fav);
-//                               }),
-//                         )
-//                       ],
-//                     ),
-//                   ),
+
+class BuildProductCard extends StatefulWidget {
+  ProductList p;
+  Custom custom;
+  User currentUser;
+  BuildProductCard({this.currentUser, this.custom, this.p});
+
+  @override
+  _BuildProductCardState createState() => _BuildProductCardState();
+}
+
+class _BuildProductCardState extends State<BuildProductCard> {
+  handleCart(ProductList product, BuildContext context) async {
+    try {
+      QuerySnapshot doc =
+          await Firestore.instance.collection('carts').getDocuments();
+      print(doc.documents.length);
+      bool isInCart = false;
+      print(doc.documents.map((f) {
+        if (f.data['productId'] == product.id &&
+            f.data['userId'] == widget.currentUser.uid) {
+          isInCart = true;
+        } else {
+          isInCart = false;
+        }
+      }));
+      if (!isInCart) {
+        var id = new DateTime.now().millisecondsSinceEpoch;
+        await Firestore.instance
+            .collection('carts')
+            .document(id.toString())
+            .setData({
+          "cartId": id,
+          "productId": product.id,
+          "quantity": 1,
+          "productName": product.title,
+          "thumbnailImage": product.thumbnailImage,
+          "discount": product.discount,
+          "price": product.price,
+          "userId": widget.currentUser.uid,
+          "timestamp": DateTime.now(),
+        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Success",
+                  style: TextStyle(
+                    color: Colors.green,
+                  )),
+              content: Text("Product Added to cart"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Ok", style: TextStyle(color: Colors.black)),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyHomePage(
+                                  currentUser: widget.currentUser,
+                                )));
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        buildErrorDialog("Product Already in Cart!", context);
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  handleAddToWishlist(String productId, bool fav) async {
+    List productIds = List();
+    productIds.add(productId);
+    if (fav) {
+      await Firestore.instance
+          .collection('wishlists')
+          .document(widget.currentUser.uid)
+          .updateData({'productIds': FieldValue.arrayUnion(productIds)});
+    } else if (!fav) {
+      await Firestore.instance
+          .collection('wishlists')
+          .document(widget.currentUser.uid)
+          .updateData({'productIds': FieldValue.arrayRemove(productIds)});
+    }
+  }
+
+  bool fav;
+  getWishProduct() async {
+    bool _fav = await Datastore().getWishList(widget.currentUser, widget.p);
+    setState(() {
+      fav = _fav;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getWishProduct();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: GestureDetector(
+        onTap: () {},
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Container(
+            color: Color(0xffECECEC),
+            child: Row(
+              children: <Widget>[
+                Stack(
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 150,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: CachedNetworkImageProvider(
+                                  widget.p.thumbnailImage))),
+                    ),
+                    widget.p.discount > 0
+                        ? Align(
+                            alignment: Alignment.topLeft,
+                            child: Container(
+                                width: 20,
+                                height: 20,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    color: Colors.red[100],
+                                    borderRadius: BorderRadius.circular(32)),
+                                child: Center(
+                                  child: Text(
+                                    widget.p.discount.toString() + "%",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                )))
+                        : Container()
+                  ],
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Container(
+                  child: Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 4),
+                          child: Text(
+                            '${widget.p.title}',
+                            overflow: TextOverflow.fade,
+                            style: Theme.of(context).textTheme.subtitle,
+                          ),
+                        ),
+                        Text(
+                          '${widget.p.description}',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        InSectionSpacing(),
+                        Column(
+                          children: <Widget>[
+                            Text(
+                                '₹ ' +
+                                    (widget.p.price -
+                                            (widget.p.price *
+                                                widget.p.discount /
+                                                100))
+                                        .toString(),
+                                style: widget.custom.cardTitleTextStyle),
+                            widget.p.discount > 0
+                                ? Text('₹ ' + widget.p.price.toString(),
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        decoration: TextDecoration.lineThrough))
+                                : Text(""),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            buildRaisedButton("Add to Cart", Colors.white,
+                                Theme.of(context).primaryColor, () {
+                              handleCart(widget.p, context);
+                            }),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: IconButton(
+                                        icon: fav
+                                            ? Icon(
+                                                FontAwesome.heart,
+                                                size: 15,
+                                                color: Colors.red,
+                                              )
+                                            : Icon(
+                                                FontAwesome.heart_o,
+                                                size: 15,
+                                                color: Colors.red,
+                                              ),
+                                        onPressed: () {
+                                          fav = !fav;
+                                          handleAddToWishlist(
+                                              widget.p.id.toString(), fav);
+                                          print(fav);
+                                        }),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

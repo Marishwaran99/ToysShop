@@ -49,6 +49,7 @@ class _ProductPageDetailPageState extends State<ProductPageDetailPage> {
     return Scaffold(
       appBar: MyAppBar(
         back: true,
+        text: "Toys",
       ),
       body: SingleChildScrollView(
           child: Container(

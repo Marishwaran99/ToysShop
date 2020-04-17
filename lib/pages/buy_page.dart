@@ -100,7 +100,6 @@ class _BuyPageState extends State<BuyPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     _razor.clear();
   }
