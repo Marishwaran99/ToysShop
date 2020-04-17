@@ -201,4 +201,13 @@ class Datastore implements BaseDatastore {
         .catchError((err) => err.toString());
     return status;
   }
+
+  Future<QuerySnapshot> getOnlineTransactionProducts() async {
+    QuerySnapshot snapshots = await Firestore.instance
+        .collection('onlinepayments')
+        .where('paymentType', isEqualTo: 'Online')
+        .getDocuments();
+
+    return snapshots;
+  }
 }

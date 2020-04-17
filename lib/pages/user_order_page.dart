@@ -19,12 +19,13 @@ class UserOrderPage extends StatefulWidget {
 
 class orderModel{
   int orderId, total, subTotal, tax, shipping ;
-  String userId, address, state, city, receiverName, paymentType, status;
+  String userId, address, state, city, receiverName, paymentType, status, transactionId;
   List productIds, quantity, productName;
   Timestamp timestamp;
-  orderModel({this.address, this.city, this.orderId, this.paymentType, this.productIds, this.quantity, this.receiverName, this.shipping, this.state, this.subTotal, this.tax, this.total, this.userId, this.timestamp, this.productName, this.status});
+  orderModel({this.address, this.city, this.orderId, this.paymentType, this.productIds, this.quantity, this.receiverName, this.shipping, this.state, this.subTotal, this.tax, this.total, this.userId, this.timestamp, this.productName, this.status, this.transactionId});
   factory orderModel.fromDocument(DocumentSnapshot doc) {
     return orderModel(
+      transactionId: doc.data['transactionId'],
       productName: doc.data['productName'],
       address: doc.data['address'],
       city: doc.data['city'],

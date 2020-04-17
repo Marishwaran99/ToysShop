@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:toys/main.dart';
 import 'package:toys/models/product.dart';
 import 'package:toys/models/user.dart';
 import 'package:toys/pages/add_to_cart_page.dart';
@@ -17,6 +18,35 @@ class BuyPage extends StatefulWidget {
 
   @override
   _BuyPageState createState() => _BuyPageState();
+}
+
+class onlinePayment{
+  int orderId, total, subTotal, tax, shipping ;
+  String userId, address, state, city, receiverName, paymentType, status, transactionId;
+  List productIds, quantity, productName;
+  Timestamp timestamp;
+  onlinePayment({this.address, this.city, this.orderId, this.paymentType, this.productIds, this.quantity, this.receiverName, this.shipping, this.state, this.subTotal, this.tax, this.total, this.userId, this.timestamp, this.productName, this.status, this.transactionId});
+  factory onlinePayment.fromDocument(DocumentSnapshot doc) {
+    return onlinePayment(
+      transactionId: doc.data['transactionId'],
+      productName: doc.data['productName'],
+      address: doc.data['address'],
+      city: doc.data['city'],
+      orderId: doc.data['orderId'],
+      paymentType: doc.data['paymentType'],
+      productIds: doc.data['productIds'],
+      quantity: doc.data['quantity'],
+      receiverName: doc.data['receiverName'],
+      shipping: doc.data['shipping'],
+      state: doc.data['state'],
+      subTotal: doc.data['sub-total'],
+      timestamp: doc.data['timestamp'],
+      tax: doc.data['tax'],
+      total: doc.data['total'],
+      userId: doc.data['userId'],
+      status: doc.data['status']
+    );
+  }
 }
 
 class _BuyPageState extends State<BuyPage> {
@@ -38,8 +68,9 @@ class _BuyPageState extends State<BuyPage> {
       _cartProductList = cartProductList;
     });
     for (var cart in cartProductList) {
-      _subTotal =
-          _subTotal + (cart.price - (cart.price * cart.discount / 100)).toInt();
+      _subTotal = (_subTotal +
+              (cart.price - (cart.price * cart.discount / 100)).toInt()) *
+          cart.quantity;
     }
     if (_subTotal < 500) {
       _shipping = 50;
@@ -66,37 +97,18 @@ class _BuyPageState extends State<BuyPage> {
   }
 
   String radioItem = '';
+  String _transactionId;
+  bool payment = false;
 
   @override
   void initState() {
     super.initState();
     getCartProduct();
     getCurrentUserInfo();
-    _razor = Razorpay();
-    _razor.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
-    _razor.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
-    _razor.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
   }
+
   int _id;
-
-  void handlePaymentSuccess(PaymentSuccessResponse response) {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => UserOrderPage(
-                  orderId: _id.toString(),
-                  currentUser: widget.currentUser,
-                )));
-                // print(_id);
-  }
-
-  void handlePaymentError(PaymentFailureResponse response) {
-    print(response.message);
-  }
-
-  void handleExternalWallet(ExternalWalletResponse response) {
-    print(response.walletName);
-  }
+  List _productName, _productIds, _productQuantity = List();
 
   @override
   void dispose() {
@@ -115,6 +127,84 @@ class _BuyPageState extends State<BuyPage> {
     TextEditingController stateController =
         TextEditingController(text: _currentUser.state);
 
+    void handlePaymentSuccess(PaymentSuccessResponse response) async {
+      Firestore.instance.collection("onlinepayments").document(_id.toString()).setData({
+        'transactionId': response.paymentId,
+        'productName': _productName,
+        'orderId': _id,
+        'producIds': _productIds,
+        'quantity': _productQuantity,
+        'total': _total,
+        'userId': _currentUser.uid,
+        'timestamp': DateTime.now(),
+        'sub-total': _subTotal,
+        'tax': _tax,
+        'shipping': _shipping,
+        'address': addressController.text,
+        'state': stateController.text,
+        'city': cityController.text,
+        'receiverName': userNameController.text,
+        'paymentType': radioItem,
+        'status': 'pending'
+      }).catchError((onError) {
+        print(onError);
+      });
+      Firestore.instance.collection("orders").document(_id.toString()).setData({
+        'transactionId': response.paymentId,
+        'productName': _productName,
+        'orderId': _id,
+        'producIds': _productIds,
+        'quantity': _productQuantity,
+        'total': _total,
+        'userId': _currentUser.uid,
+        'timestamp': DateTime.now(),
+        'sub-total': _subTotal,
+        'tax': _tax,
+        'shipping': _shipping,
+        'address': addressController.text,
+        'state': stateController.text,
+        'city': cityController.text,
+        'receiverName': userNameController.text,
+        'paymentType': radioItem,
+        'status': 'pending'
+      }).catchError((onError) {
+        print(onError);
+      });
+      buildSuccessDialog("Order Placed Sucessfully", context);
+      for (var product in _cartProductList) {
+        DocumentSnapshot doc = await Firestore.instance
+            .collection('products')
+            .document(product.productId.toString())
+            .get();
+        var quantity = doc.data['quatity'];
+        // print(quantity);
+        await Firestore.instance
+            .collection('products')
+            .document(product.productId.toString())
+            .updateData({'quatity': quantity - product.quantity});
+        // print("CartId:${product.cartId}");
+        await Firestore.instance
+            .collection("carts")
+            .document(product.cartId.toString())
+            .delete();
+      }
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyHomePage(
+                    currentUser: widget.currentUser,
+                  )));
+      // print(_id);
+    }
+
+    void handlePaymentError(PaymentFailureResponse response) {
+      print(response.message);
+    }
+
+    void handleExternalWallet(ExternalWalletResponse response) {
+      print(response.walletName);
+    }
+
     handlePlaceOrder() async {
       List ProductIds = List();
       List ProductQuantity = List();
@@ -130,12 +220,21 @@ class _BuyPageState extends State<BuyPage> {
           ProductQuantity.add(product.quantity);
           ProductName.add((product.productName));
         }
+        setState(() {
+          _productIds = ProductIds;
+          _productQuantity = ProductQuantity;
+          _productName = ProductName;
+        });
         int id = DateTime.now().millisecondsSinceEpoch;
         setState(() {
           _id = id;
         });
         // print(id);
         if (radioItem == "Online") {
+          _razor = Razorpay();
+          _razor.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
+          _razor.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
+          _razor.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
           print(radioItem);
           var options = {
             'key': 'rzp_test_9SXPJw8jBRSDfa',
@@ -152,52 +251,12 @@ class _BuyPageState extends State<BuyPage> {
           } catch (e) {
             print(e);
           }
-          Firestore.instance
-              .collection("orders")
-              .document(id.toString())
-              .setData({
-            'productName': ProductName,
-            'orderId': id,
-            'producIds': ProductIds,
-            'quantity': ProductQuantity,
-            'total': _total,
-            'userId': _currentUser.uid,
-            'timestamp': DateTime.now(),
-            'sub-total': _subTotal,
-            'tax': _tax,
-            'shipping': _shipping,
-            'address': addressController.text,
-            'state': stateController.text,
-            'city': cityController.text,
-            'receiverName': userNameController.text,
-            'paymentType': radioItem,
-            'status': 'pending'
-          }).catchError((onError) {
-            print(onError);
-          });
-          buildSuccessDialog("Order Placed Sucessfully", context);
-          for (var product in _cartProductList) {
-            DocumentSnapshot doc = await Firestore.instance
-                .collection('products')
-                .document(product.productId.toString())
-                .get();
-            var quantity = doc.data['quatity'];
-            // print(quantity);
-            await Firestore.instance
-                .collection('products')
-                .document(product.productId.toString())
-                .updateData({'quatity': quantity - product.quantity});
-            // print("CartId:${product.cartId}");
-            await Firestore.instance
-                .collection("carts")
-                .document(product.cartId.toString())
-                .delete();
-          }
         } else if (radioItem == "COD") {
           Firestore.instance
               .collection("orders")
               .document(id.toString())
               .setData({
+            'transactionId': '',
             'productName': ProductName,
             'orderId': id,
             'producIds': ProductIds,
@@ -316,7 +375,10 @@ class _BuyPageState extends State<BuyPage> {
     }
 
     return Scaffold(
-      appBar: MyAppBar(),
+      appBar: MyAppBar(
+        text: 'Toys',
+        back: true,
+      ),
       body: SingleChildScrollView(
           child: Container(
               alignment: Alignment.center,
@@ -633,7 +695,12 @@ class _BuyPageState extends State<BuyPage> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '₹ ' + product.price.toString(),
+                                    '₹ ' +
+                                        (product.price -
+                                                (product.price *
+                                                    (product.discount / 100)))
+                                            .toInt()
+                                            .toString(),
                                     style: TextStyle(fontSize: 14),
                                   ),
                                   SizedBox(width: 30),

@@ -6,6 +6,7 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:toys/models/user.dart';
 import 'package:toys/pages/admin/delete_page.dart';
 import 'package:toys/pages/admin/delivered_page.dart';
+import 'package:toys/pages/admin/online_transaction.dart';
 import 'package:toys/pages/admin/order_page.dart';
 import 'package:toys/pages/admin/upload_page.dart';
 import 'package:toys/pages/admin/view_page.dart';
@@ -351,7 +352,12 @@ class AdminDrawer extends StatelessWidget {
                     )));
       },
       () {
-        print("Online");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => OrderTransaction(
+                      currentUser: currentUser,
+                    )));
       }
     ];
     return Drawer(
