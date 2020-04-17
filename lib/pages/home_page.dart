@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:toys_shop/services/auth.dart';
+import 'package:toys_shop/services/datastore.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/home_page_carousel.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
@@ -6,6 +8,11 @@ import 'package:toys_shop/widgets/product_carousel.dart';
 import 'package:toys_shop/widgets/section_spacing.dart';
 
 class HomePage extends StatefulWidget {
+
+  final Auth auth;
+  final Datastore datastore;
+
+  HomePage({this.auth, this.datastore});
   @override
   _HomePageState createState() => _HomePageState();
 }

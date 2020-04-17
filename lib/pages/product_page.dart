@@ -7,6 +7,8 @@ import 'package:toys_shop/dbhelpers/wishlist_dbhelper.dart';
 import 'package:toys_shop/models/product.dart';
 import 'package:toys_shop/models/wishlist.dart';
 import 'package:toys_shop/pages/product_detail_page.dart';
+import 'package:toys_shop/services/auth.dart';
+import 'package:toys_shop/services/datastore.dart';
 import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/SectionTitle.dart';
 import 'package:toys_shop/widgets/appbar.dart';
@@ -15,6 +17,10 @@ import 'package:toys_shop/widgets/in_section_spacing.dart';
 import 'package:toys_shop/widgets/section_spacing.dart';
 
 class ProductPage extends StatefulWidget {
+  final Auth auth;
+  final Datastore datastore;
+
+  ProductPage({this.auth, this.datastore});
   @override
   _ProductPageState createState() => _ProductPageState();
 }

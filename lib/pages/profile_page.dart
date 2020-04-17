@@ -116,6 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             MaterialPageRoute(
                                                 builder: (BuildContext ctx) {
                                           return ViewAllProductPage(
+                                            auth: widget.auth,
                                             datastore: widget.datastore,
                                           );
                                         }));

@@ -35,9 +35,9 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     _screens = [
-      HomePage(),
-      ProductPage(),
-      ShoppingCartPage(),
+      HomePage(auth: widget.auth, datastore: widget.datastore,),
+      ProductPage(auth: widget.auth, datastore: widget.datastore),
+      ShoppingCartPage(auth: widget.auth, datastore: widget.datastore, ),
       ProfilePage(
           auth: widget.auth,
           datastore: widget.datastore,

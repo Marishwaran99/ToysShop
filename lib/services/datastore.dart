@@ -3,18 +3,18 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:toys_shop/models/user.dart';
 
 abstract class BaseDatastore {
+  //user functions
   Future<String> addUserData(User user);
   Future<Map<String, dynamic>> getUserData(String uid);
   Future<String> updateUserData(String uid, String name);
-  Future<String> addProductToCart(String uid, Map<String, dynamic> productId);
   Future<String> storeProfilePic(String uid, File image);
+  //product function
+  Future<String> addProductToCart(String uid,int amount, Map<String, dynamic> product);
   Future<String> saveDeliveryLocation(
       String uid, Map<String, dynamic> deliveryAddress);
-
   Future<String> addProduct(String id, Map<String, dynamic> product);
   Future<String> addProductImage(File image, String id);
   Future<String> deleteProductImage(String id);
@@ -22,6 +22,7 @@ abstract class BaseDatastore {
   Future<String> updateProduct(String id, Map<String, dynamic> product);
   String getProductId();
   Stream<QuerySnapshot> getProducts();
+  Future<List<String>> getCartProducts(String uid);
 }
 
 class Datastore implements BaseDatastore {
@@ -59,15 +60,17 @@ class Datastore implements BaseDatastore {
 
   @override
   Future<String> addProductToCart(
-      String uid, Map<String, dynamic> productId) async {
-    String status = await _firestore
-        .collection("users")
-        .document(uid)
-        .updateData({
-          'cartProducts': FieldValue.arrayUnion([productId])
-        })
-        .then((val) => 'success')
-        .catchError((err) => err.toString());
+      String uid,int amount, Map<String, dynamic> product) async {
+        var batch = _firestore.batch();
+    DocumentReference userRef = _firestore.collection("users").document(uid);
+    DocumentReference productRef =
+        _firestore.collection("products").document(product['productId']);
+    batch.updateData(userRef, {
+      'cartProducts': FieldValue.arrayUnion([product])
+    });
+    batch.updateData(productRef, {'stock': amount});
+
+    String status = await batch.commit().then((val)=>'success').catchError((err)=>err.toString());
     return status;
   }
 
@@ -163,5 +166,13 @@ class Datastore implements BaseDatastore {
         .then((val) => 'success')
         .catchError((err) => err.toString());
     return status;
+  }
+
+  @override
+  Future<List<String>> getCartProducts(String uid) async{
+    DocumentSnapshot snapshot = await _firestore.collection('users').document(uid).get();
+    Map<String, dynamic> user = snapshot.data;
+    List<String> cartProducts = user['cartProducts'].cast<String>();
+    return cartProducts;
   }
 }

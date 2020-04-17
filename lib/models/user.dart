@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:toys_shop/models/product.dart';
 import 'package:toys_shop/models/review.dart';
 
 class User {
   String uid, username, email, photoUrl;
   Map<String, dynamic> deliveryAddress;
-  List<String> cartProducts, boughtProducts;
+  List<Product> cartProducts, boughtProducts;
   List<Review> reviews;
   String role;
   User(

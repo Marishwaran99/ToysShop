@@ -1,22 +1,39 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:toys_shop/models/product.dart';
 import 'package:toys_shop/pages/add_product_page.dart';
 import 'package:toys_shop/pages/product_detail_page.dart';
+import 'package:toys_shop/services/auth.dart';
 import 'package:toys_shop/services/datastore.dart';
 import 'package:toys_shop/styles/custom.dart';
 import 'package:toys_shop/widgets/in_section_spacing.dart';
 
 class ViewAllProductPage extends StatefulWidget {
   final Datastore datastore;
-  ViewAllProductPage({this.datastore});
+  final Auth auth;
+  ViewAllProductPage({this.datastore, this.auth});
   @override
   _ViewAllProductPageState createState() => _ViewAllProductPageState();
 }
 
 class _ViewAllProductPageState extends State<ViewAllProductPage> {
+  String uid;
+
+
+  getUserId() async {
+    FirebaseUser user = await widget.auth.getCurrentUser();
+    uid = user.uid;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserId();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +68,7 @@ class _ViewAllProductPageState extends State<ViewAllProductPage> {
                       stock: productMap["stock"],
                       thumbnailImage: productMap["thumbImage"],
                       previewImages: previewImages);
-                  return ProductCard(_product, widget.datastore);
+                  return ProductCard(_product, widget.datastore, uid);
                 });
           }),
       floatingActionButton: FloatingActionButton(
@@ -71,7 +88,8 @@ class _ViewAllProductPageState extends State<ViewAllProductPage> {
 class ProductCard extends StatefulWidget {
   final Product product;
   final Datastore datastore;
-  ProductCard(this.product, this.datastore);
+  final String uid;
+  ProductCard(this.product, this.datastore, this.uid);
   @override
   _ProductCardState createState() => _ProductCardState();
 }
@@ -103,7 +121,8 @@ class _ProductCardState extends State<ProductCard> {
                                   image: NetworkImage(
                                       widget.product.thumbnailImage['image']))),
                         ),
-                        widget.product.discount != null
+                        widget.product.discount != null &&
+                                widget.product.discount > 0
                             ? Align(
                                 alignment: Alignment.topLeft,
                                 child: Container(
@@ -159,6 +178,17 @@ class _ProductCardState extends State<ProductCard> {
                               log(widget.product.productId);
                               String status = await widget.datastore
                                   .deleteProduct(widget.product.productId);
+
+                              log(status);
+                            }),
+                        IconButton(
+                            icon: Icon(Icons.shopping_basket,
+                                color: Colors.red[200]),
+                            onPressed: () async {
+                              String status = await widget.datastore.addProductToCart(
+                                  widget.uid,
+                                  widget.product.stock - 1,
+                                  widget.product.toMap());
 
                               log(status);
                             }),
