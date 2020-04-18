@@ -37,16 +37,7 @@ class _DeletePageState extends State<DeletePage> {
               itemCount: snapshot.data.documents.length,
               itemBuilder: (context, index) {
                 // print(snapshot.data.documents[index].data);
-                Product product = Product(
-                  snapshot.data.documents[index].data['id'],
-                  snapshot.data.documents[index].data['title'],
-                  snapshot.data.documents[index].data['description'],
-                  snapshot.data.documents[index].data['discount'],
-                  snapshot.data.documents[index].data['quantity'],
-                  snapshot.data.documents[index].data['thumbnailImage'],
-                  snapshot.data.documents[index].data['price'],
-                  snapshot.data.documents[index].data['adminId'],
-                );
+                ProductList product = ProductList.fromDocument(snapshot.data.documents[index]);
                 return snapshot.data.documents.length == 0
                     ? Center(child: Text("U have Not Yet Uploaded"))
                     : ProductCard(product, "admin", true);

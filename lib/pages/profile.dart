@@ -59,20 +59,19 @@ class _LoginPageState extends State<LoginPage> {
         currentUser = details;
         _loading = false;
       });
+      QuerySnapshot snapshots = await Firestore.instance
+          .collection('orders')
+          .where('userId', isEqualTo: currentUser.uid)
+          .getDocuments();
+      setState(() {
+        _orderCount = snapshots.documents.length;
+      });
+      print(_orderCount);
     } else {
       setState(() {
         _loading = false;
       });
     }
-    print(currentUser.role);
-    QuerySnapshot snapshots = await Firestore.instance
-        .collection('orders')
-        .where('userId', isEqualTo: currentUser.uid)
-        .getDocuments();
-    setState(() {
-      _orderCount = snapshots.documents.length;
-    });
-    print(_orderCount);
   }
 
   int _orderCount = 0;

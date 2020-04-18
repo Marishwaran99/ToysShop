@@ -16,21 +16,13 @@ class ProductPageDetailPage extends StatefulWidget {
 }
 
 class _ProductPageDetailPageState extends State<ProductPageDetailPage> {
-  Product _product;
+  ProductList _product;
   getProductInfo() async {
     DocumentSnapshot doc = await Firestore.instance
         .collection('products')
         .document(widget.productId.toString())
         .get();
-    Product product = Product(
-        doc.data['id'],
-        doc.data['title'],
-        doc.data['description'],
-        doc.data['discount'],
-        doc.data['quantity'],
-        doc.data['thumbnailImage'],
-        doc.data['price'],
-        doc.data['adminId']);
+    ProductList product = ProductList.fromDocument(doc);
     setState(() {
       _product = product;
     });

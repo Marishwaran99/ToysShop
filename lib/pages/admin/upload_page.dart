@@ -2,17 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:toys/models/user.dart';
 import 'package:toys/widgets/appbar.dart';
 import 'package:toys/widgets/customLoading.dart';
 import 'package:toys/widgets/widget.dart';
-import 'admin_page.dart';
 import 'package:path/path.dart';
 
 class UploadPage extends StatefulWidget {
@@ -33,9 +30,7 @@ class _UploadPageState extends State<UploadPage> {
   String _title, _description, _discount, _price, _quantity;
   File _image;
   bool isLoading = false;
-
-  List<Asset> images = List<Asset>();
-  String _error = 'No Error Dectected';
+  List<File> _images = List<File>();
   String dropdownValue = 'Yes';
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -113,12 +108,13 @@ class _UploadPageState extends State<UploadPage> {
         isLoading = true;
       });
       List<String> previewImage = List<String>();
-      String thumbnailImage = await uploadImage(basename(_image.path));
       int stock;
-      for (var asset in images) {
-        String downloadUrl = await uploadImage(asset.name);
-        previewImage.add(downloadUrl);
+      for (var img in _images) {
+        print(img);
+        String previewImageUrl = await uploadImage(basename(img.path), img);
+        previewImage.add(previewImageUrl);
       }
+      String thumbnailImage = await uploadImage(basename(_image.path), _image);
       var discount = int.parse(discountController.text);
       assert(discount is int);
       var price = int.parse(priceController.text);
@@ -163,51 +159,30 @@ class _UploadPageState extends State<UploadPage> {
       }
       setState(() {
         isLoading = false;
-        images = [];
+        _images = [];
         _image = null;
       });
       buildSuccessDialog("Upload Sucessfull", context);
     }
   }
 
-  Future<String> uploadImage(String fileName) async {
+  Future<String> uploadImage(String fileName, File image) async {
     // String fileName = basename(img.path);
     StorageReference firebaseStorageRef =
         FirebaseStorage.instance.ref().child(fileName);
-    StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(image);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    fileName = '';
     return downloadUrl;
   }
 
   Future<void> loadAssets() async {
-    List<Asset> resultList = List<Asset>();
-    String error = 'No Error Dectected';
-
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 300,
-        enableCamera: true,
-        selectedAssets: images,
-        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
-        materialOptions: MaterialOptions(
-          actionBarColor: "#000000",
-          actionBarTitle: "Select Image",
-          allViewTitle: "All Photos",
-          useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-    if (!mounted) return;
-
+    var file = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
-      images = resultList;
-      _error = error;
+      _images.add(file);
     });
-    print(images);
+    print(_images);
   }
 
   @override
@@ -215,10 +190,18 @@ class _UploadPageState extends State<UploadPage> {
     super.dispose();
   }
 
+  handleDeletePreviewImage(File img) {
+    _images.remove(img);
+    print(_images);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(text: 'Toys', back: true,),
+      appBar: MyAppBar(
+        text: 'Toys',
+        back: true,
+      ),
       body: isLoading
           ? circularProgress(context)
           : Center(
@@ -303,25 +286,111 @@ class _UploadPageState extends State<UploadPage> {
                     ],
                   ),
                   SizedBox(height: 20),
+                  _image == null
+                      ? Container()
+                      : SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Column(
+                            children: <Widget>[
+                              Row(
+                                children: <Widget>[
+                                  Stack(
+                                    children: <Widget>[
+                                      Container(
+                                        width: 100,
+                                        height: 100,
+                                        child: Image.file(_image),
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          // handleDeletethumbnailImage(
+                                          //     products.thumbnailImage, products.id);
+                                        },
+                                        child: Align(
+                                          alignment: Alignment.topRight,
+                                          child: Container(
+                                              width: 25,
+                                              height: 25,
+                                              padding: EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(30),
+                                                  color: Colors.red[500]),
+                                              child: Center(
+                                                  child: Text(
+                                                "X",
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12),
+                                              ))),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      buildRaisedButton("thumbnailImage", Colors.white,
+                      buildRaisedButton("ThumbnailImage", Colors.white,
                           Theme.of(context).primaryColor, () {
                         handleImageSelection();
                       }),
-                      _image == null
-                          ? Text("")
-                          : Wrap(children: <Widget>[
-                              Text(
-                                basename(_image.path),
-                                style: TextStyle(fontSize: 10),
-                                overflow: TextOverflow.fade,
-                              )
-                            ])
                     ],
                   ),
                   SizedBox(height: 20),
+                  _images == null
+                      ? Container()
+                      : SizedBox(
+                          height: 100.0,
+                          child: ListView.builder(
+                              itemCount: _images.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Row(
+                                  children: <Widget>[
+                                    Stack(
+                                      children: <Widget>[
+                                        Container(
+                                          width: 100,
+                                          height: 100,
+                                          child: Image.file(_images[index]),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            handleDeletePreviewImage(
+                                                _images[index]);
+                                          },
+                                          child: Align(
+                                            alignment: Alignment.topRight,
+                                            child: Container(
+                                                width: 25,
+                                                height: 25,
+                                                padding: EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                    color: Colors.red[500]),
+                                                child: Center(
+                                                    child: Text(
+                                                  "X",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12),
+                                                ))),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(width: 10)
+                                  ],
+                                );
+                              }),
+                        )
+                  ,
                   Row(
                     children: <Widget>[
                       buildRaisedButton("previewImage", Colors.white,
@@ -331,19 +400,6 @@ class _UploadPageState extends State<UploadPage> {
                     ],
                   ),
                   SizedBox(height: 20),
-                  images.length == 0
-                      ? Text("")
-                      : Container(
-                          child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: images.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Text(
-                              images[index].name.toString(),
-                              style: TextStyle(fontSize: 10),
-                            );
-                          },
-                        )),
                   SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,

@@ -51,19 +51,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  User currentUser;
+  User _currentUser;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _cartCount = '0';
   int _currentIndex = 0;
-  getCartCount() async {
-    QuerySnapshot doc = await Firestore.instance
-        .collection('carts')
-        .where('userId', isEqualTo: currentUser.uid)
-        .getDocuments();
-    setState(() {
-      _cartCount = doc.documents.length.toString();
-    });
-  }
 
   void loginCallback() {
     Auth().getCurrentUser().then((user) {
@@ -99,12 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
           .get();
       User details = User.fromFirestore(doc);
       setState(() {
-        currentUser = details;
+        _currentUser = details;
         _currentIndex = 0;
       });
       QuerySnapshot docs = await Firestore.instance
           .collection('carts')
-          .where('userId', isEqualTo: currentUser.uid)
+          .where('userId', isEqualTo: _currentUser.uid)
           .getDocuments();
       setState(() {
         _cartCount = docs.documents.length.toString();
@@ -117,7 +108,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    getCartCount();
     getCurrentUserInfo();
   }
 
@@ -125,16 +115,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final List<Widget> _children = [
       HomePage(
-        details: currentUser,
+        details: _currentUser,
       ),
       ProductPage(
-        currentUser: currentUser,
+        currentUser: _currentUser,
       ),
       AddToCartPage(
-        currentUser: currentUser,
+        currentUser: _currentUser,
       ),
       LoginPage(
-        details: currentUser,
+        details: _currentUser,
         logoutCallback: logoutCallback,
       )
     ];

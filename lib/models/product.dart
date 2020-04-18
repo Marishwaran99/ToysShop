@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Product{
-  int id, discount, price, quantity;
-  String title, description, thumbnailImage, adminId, timestamp;
-  List<dynamic> previewImages;
-  int stock;
-  Product(this.id, this.title, this.description, this.discount, this.quantity, this.thumbnailImage, this.price, this.adminId, {this.previewImages, this.stock});
-}
+// class Product{
+//   int id, discount, price, quantity;
+//   String title, description, thumbnailImage, adminId, timestamp;
+//   List<dynamic> previewImages;
+//   int stock;
+//   Product(this.id, this.title, this.description, this.discount, this.quantity, this.thumbnailImage, this.price, this.adminId, {this.previewImages, this.stock});
+// }
 
 class ProductList{
   int id, discount, price, quantity;
@@ -20,7 +20,7 @@ class ProductList{
       title: doc.data['title'],
       description: doc.data['description'],
       discount: doc.data['discount'],
-      quantity: doc.data['quantity'],
+      quantity: doc.data['quatity'],
       thumbnailImage: doc.data['thumbnailImage'],
       price: doc.data['price'],
       adminId: doc.data['adminId'],

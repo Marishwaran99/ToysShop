@@ -8,6 +8,7 @@ import 'package:toys/pages/admin/delete_page.dart';
 import 'package:toys/pages/admin/delivered_page.dart';
 import 'package:toys/pages/admin/online_transaction.dart';
 import 'package:toys/pages/admin/order_page.dart';
+import 'package:toys/pages/admin/update_page.dart';
 import 'package:toys/pages/admin/upload_page.dart';
 import 'package:toys/pages/admin/view_page.dart';
 import 'package:toys/widgets/appbar.dart';
@@ -341,7 +342,13 @@ class AdminDrawer extends StatelessWidget {
                     )));
       },
       () {
-        print("Update");
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ViewPage(
+                      isUpdate: 'true',
+                      currentUser: currentUser,
+                    )));
       },
       () {
         Navigator.push(

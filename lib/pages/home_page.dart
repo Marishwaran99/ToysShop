@@ -17,6 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   User _currentUser;
   getCurrentUserInfo() async {
+    print("UID:${widget.details.uid}");
     DocumentSnapshot doc = await Firestore.instance
         .collection('users')
         .document(widget.details.uid)
@@ -28,12 +29,13 @@ class _HomePageState extends State<HomePage> {
       _currentUser = details;
     });
   }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getCurrentUserInfo();
   }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -44,11 +46,15 @@ class _HomePageState extends State<HomePage> {
           SectionSpacing(),
           SectionTitle("Best Sellers"),
           InSectionSpacing(),
-          HomePageCarousel(currentUser:_currentUser,),
+          HomePageCarousel(
+            currentUser: _currentUser,
+          ),
           SectionSpacing(),
           SectionTitle("Top Products"),
           InSectionSpacing(),
-          ProductCarousel(currentUser: _currentUser,)
+          ProductCarousel(
+            currentUser: _currentUser,
+          )
         ],
       ),
     ));

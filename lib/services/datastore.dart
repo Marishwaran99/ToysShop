@@ -21,6 +21,7 @@ abstract class BaseDatastore {
   Future<String> addProductImage(File image, String id);
   Future<String> deleteProductImage(String id);
   Future<String> updateProduct(String id, Map<String, dynamic> product);
+  Future<String> uploadImage(String fileName, File image);
   Stream<QuerySnapshot> getProducts();
 }
 
@@ -200,6 +201,17 @@ class Datastore implements BaseDatastore {
         .then((val) => 'success')
         .catchError((err) => err.toString());
     return status;
+  }
+
+  Future<String> uploadImage(String fileName, File image) async {
+    // String fileName = basename(img.path);
+    StorageReference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(image);
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    fileName = '';
+    return downloadUrl;
   }
 
   Future<QuerySnapshot> getOnlineTransactionProducts() async {

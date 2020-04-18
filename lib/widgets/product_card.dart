@@ -11,7 +11,7 @@ import 'package:toys/widgets/widget.dart';
 import 'package:path/path.dart';
 
 class ProductCard extends StatefulWidget {
-  final Product product;
+  final ProductList product;
   bool isDeletePage;
   String role;
   ProductCard(this.product, this.role, this.isDeletePage);
